@@ -11,7 +11,7 @@ import sys
 from string import Template
 import numpy #for arange
 
-#Default configuration variables
+#Default configuration variables (override these in the control file)
 start_current = -7.0 #this is log() value
 end_current = -2.0 #this is log() value
 step = 0.50 #this is log() value
@@ -33,7 +33,7 @@ try:
 except IOError: 
     print 'Error: '+control_file+' does not exist!'
     sys.exit(1)
-print 'Read control file successfully: '+control_file
+#print 'Read control file successfully: '+control_file
 
 
 #Templates
@@ -65,9 +65,20 @@ save: cp${run}_${pass_count}''')
 #the COM file beginning.
 print '\xeb\x05\x00\x00'
 
-#We add step to the end_current since arange does not end at our specified
-#end_current, but rather one step before it.
-current_range = numpy.arange(start_current, end_current + step, step)
+
+#Check which direction we should be stepping. If the starting current is larger
+#than the ending current, then we should be decreasing the current by each step.
+if start_current > end_current:
+    #We add step to the end_current since arange does not end at our specified
+    #end_current, but rather one step before it.
+    current_range = numpy.arange(end_current, start_current + step, step)
+
+    #Reverse the array. NOTE: We cannot use .reverse() since it is not
+    #implemented in ndarray.
+    current_range = current_range[::-1]
+else:
+    current_range = numpy.arange(start_current, end_current + step, step)
+
 for pass_count in range(1, num_passes + 1): #shift range to start at 1
     print header_template
     for i, v in enumerate(current_range):
