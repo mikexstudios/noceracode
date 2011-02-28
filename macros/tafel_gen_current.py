@@ -1,15 +1,40 @@
 #!/usr/bin/env python
+# tafel_gen_current.py
+# --------------------
+# Usage: tafel_gen_current.py [configuration file] | tee [experiment].mcr
+#
+# Generates a macro (.mcr) file containing a series of chronopotentiometry 
+# experiments for the purpose of collecting Tafel data. For CHI Electrochemical
+# Workstation version 10.x.
 
+import sys
 from string import Template
 import numpy #for arange
 
-#Configuration variables
+#Default configuration variables
 start_current = -7.0 #this is log() value
 end_current = -2.0 #this is log() value
-#step = 0.25 #this is log() value
 step = 0.50 #this is log() value
 each_runtime = 300 #seconds; runtime of each datapoint
 num_passes = 2 #number of duplicate Tafel runs. Starts at 1
+
+try:
+    control_file= sys.argv[1]
+except IndexError:
+    #NOTE: These print commands are commented out because the output of this
+    #      script is redirected into a file.
+    #print 'Usage: %s [controlfile]' % sys.argv[0]
+    #print 'Since no control file specified, assuming the file is: control'
+    control_file = 'control'
+
+#Source the control file:
+try:
+    execfile(control_file)
+except IOError: 
+    print 'Error: '+control_file+' does not exist!'
+    sys.exit(1)
+print 'Read control file successfully: '+control_file
+
 
 #Templates
 #CP technique settings
