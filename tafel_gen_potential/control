@@ -1,0 +1,15 @@
+############################################################################
+# configuration file for tafel_gen_current.py
+# To use: tafel_gen_current.py [this_config_file]
+# (Need to run script in the same directory as config file.)
+#
+# Note: This file will be sourced into a python script so make sure you have
+# correct syntax here.
+############################################################################
+
+start_current = -7.0 #this is log() value
+end_current = -2.0 #this is log() value
+#step = 0.25 #this is log() value
+step = 0.50 #this is log() value
+each_runtime = 300 #seconds; runtime of each datapoint
+num_passes = 2 #number of duplicate Tafel runs. Starts at 1
