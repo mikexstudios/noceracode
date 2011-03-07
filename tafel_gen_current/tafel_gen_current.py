@@ -91,3 +91,4 @@ for pass_count in range(1, num_passes + 1): #shift range to start at 1
                 pass_count = pass_count, runtime = each_runtime)
     print
     print
+    print 'delay = 60' #sec

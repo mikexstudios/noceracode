@@ -11,5 +11,5 @@ start_current = -3.0 #this is log() value
 end_current = -6.0 #this is log() value
 #step = 0.25 #this is log() value
 step = 0.25 #this is log() value
-each_runtime = 600 #seconds; runtime of each datapoint
+each_runtime = 800 #seconds; runtime of each datapoint
 num_passes = 2 #number of duplicate Tafel runs. Starts at 1
