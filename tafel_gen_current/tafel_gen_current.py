@@ -47,6 +47,7 @@ header_template = (
 'el = 0',        #low limit of potential in CV, CA, CP
                  #(even if we set time priority, the software still follows
                  # eh and ei! It's dumb!)
+'ta = %s' % each_runtime, #runtime of each datapoint in sec.
 'priot',         #time priority in CP
 )
 header_template = '\n'.join(header_template)
@@ -55,7 +56,6 @@ header_template = '\n'.join(header_template)
 #ta = 600 is a pretty good default.
 run_template = Template('''
 ia = ${current}
-ta = ${runtime}
 run
 save: cp${run}_${pass_count}''')
 #run_template = run_template.substitute(runtime = each_runtime)
@@ -80,7 +80,7 @@ else:
     current_range = numpy.arange(start_current, end_current + step, step)
 
 for pass_count in range(1, num_passes + 1): #shift range to start at 1
-    print header_template
+    print header_template,
     for i, v in enumerate(current_range):
         #Convert from log(v) to v
         v = 10**v
@@ -88,7 +88,7 @@ for pass_count in range(1, num_passes + 1): #shift range to start at 1
         #Format v in scientific mode
         v = '%0.2e' % v
         print run_template.substitute(current = v, run = i, 
-                pass_count = pass_count, runtime = each_runtime)
-    print
+                pass_count = pass_count),
+    #print
     print
     print 'delay = 60' #sec
