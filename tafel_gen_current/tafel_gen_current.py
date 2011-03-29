@@ -43,8 +43,8 @@ header_template = (
 'pn = p',        #initial current polarity in CP
 'si = 1',        #sample interval in BE, CP (in s)
 'cl = 1',        #number of segments in CV and CP
-'eh = 3',        #high limit of potential in CV, CA, CP
-'el = 0',        #low limit of potential in CV, CA, CP
+'eh = 1.7',        #high limit of potential in CV, CA, CP
+'el = 0.5',        #low limit of potential in CV, CA, CP
                  #(even if we set time priority, the software still follows
                  # eh and ei! It's dumb!)
 'ta = %s' % each_runtime, #runtime of each datapoint in sec.
