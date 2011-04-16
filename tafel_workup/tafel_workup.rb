@@ -3,15 +3,25 @@
 # An all in one script that ties together the tafel data workup process. Supposed
 # to simplify the slightly tedious process of copying and modifying files around.
 
-#Parameters:
-$uncompensated_resistance = 23.4
+#Default configuration variables (override these in the control file)
+$uncompensated_resistance = 20
 $plot_title = '5 layer Mn in 0.5 M KPi, pH 2.49; H->L, 300s/pt - Pass #{pass} (04/02/2011)'
 $pass_colors = ['red', 'orange', 'cadetblue1', 'green', 'blue', 'purple', 'black']
 $combined_ylim = [0.58, 1.03]
 
 $tafel_gen_script = 'tafel_cp.sh'
+
+$templates_path = './' #default to current directory
 $tafel_plot_template = 'tafel_template.R'
 $tafel_combined_template = 'tafel_combined_template.R'
+
+if File.exists?('control')
+    eval(File.open('control').read())
+end
+
+#Point the templates to full path
+$tafel_plot_template = File.join($templates_path, $tafel_plot_template)
+$tafel_combined_template = File.join($templates_path, $tafel_combined_template)
 
 # Generate tafel_cp.sh file
 # First, determine the number of passes and number of datapoints in each pass.
@@ -34,8 +44,8 @@ end
 if not File.exists?($tafel_gen_script)
     f = File.new($tafel_gen_script, 'w')
     f.puts <<-eol
-    #!/bin/bash
-    UNCOMPENSATED_RESISTANCE=#{$uncompensated_resistance}
+#!/bin/bash
+UNCOMPENSATED_RESISTANCE=#{$uncompensated_resistance}
     eol
     
     $pass.each_pair do |pass, max_datapoint|
