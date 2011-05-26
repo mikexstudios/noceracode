@@ -31,6 +31,8 @@ class AutoItX3::Window
 end
 
 AutoItX3.run('chi760d.exe')
+#Set title matching criterion looser: 2 = Match any substring in the title.
+AutoItX3.set_option('WinTitleMatchMode', 2)
 
 #Check for Link Failed window. If exists, quit software and raise error.
 #TODO: Can combine both wait and exists into one line since wait returns the
