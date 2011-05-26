@@ -43,8 +43,10 @@ if AutoItX3::Window.exists?('Error')
 end
 
 #Wait for main window to exist
-AutoItX3::Window.wait('CHI760D Electrochemical Workstation')
-main_window = AutoItX3::Window.new('CHI760D Electrochemical Workstation')
+#NOTE: We don't check for the full window title because during Errors, the window
+#      title actually changes! The only common part is 'Electrochemical'.
+AutoItX3::Window.wait('Electrochemical')
+main_window = AutoItX3::Window.new('Electrochemical')
 
 # NORMALIZE WINDOW SIZE
 #We want to set the main window to a specific size so that our pixel matching
