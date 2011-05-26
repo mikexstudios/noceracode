@@ -1,5 +1,5 @@
 require 'au3' # make sure the AutoItX3.dll is in the same directory
-require 'ruby-debug'
+#require 'ruby-debug'
 #include AutoItX3 # useful if you don't want to always use AutoItX3:: before everything
 
 #Experiment variables
