@@ -4,11 +4,18 @@ require 'au3' # make sure the AutoItX3.dll is in the same directory
 
 #Experiment variables
 anodic_current = 1e-3 #A
-anodic_time = 200 #sec
+anodic_time = 30 #sec
 potential_range = [0, 2] #low, high V
+save_file_as = 'test1.bin'
+
+status_check_interval = 10 #sec
+#When our runtime exceeds the maximum runtime given below, we assume the experiment
+#has crashed and exit from loop.
+status_max_runtime = anodic_time * 1.5 #sec
 
 #Other constants
 NETBOOK_SCREEN = [1040, 586] #px
+DATA_LIST_WINDOW_TIMEOUT = 5 #sec
 
 
 #Monkey patch Window class to check for non-responsive (hung) windows:
@@ -26,11 +33,13 @@ end
 AutoItX3.run('chi760d.exe')
 
 #Check for Link Failed window. If exists, quit software and raise error.
+#TODO: Can combine both wait and exists into one line since wait returns the
+#      handle to the window.
 AutoItX3::Window.wait('Error', '', 2) #wait for 2 sec so that we don't miss the Error window
 if AutoItX3::Window.exists?('Error')
   AutoItX3.send_keys('{ENTER}')
   AutoItX3.send_keys('!fx') # file -> exit
-  raise "Potentiostat not turned on."
+  raise 'Potentiostat not turned on.'
 end
 
 #Wait for main window to exist
@@ -89,9 +98,61 @@ AutoItX3.send_keys('!cr') #control -> run experiment
 #If the experiment has ended, do a sanity check to see if the experiment has ended
 #before our expected time.
 
+#TODO: Don't use a counter for time. Instead, use the computer's clock.
+total_runtime = 0 #sec, we keep track of how long the expt has run
+while true
+  sleep(status_check_interval)
+  total_runtime += status_check_interval
 
-if main_window.hung?
-    puts 'hung'
-else
-    puts 'not hung'
+  #Check if program has crashed.
+  if main_window.hung?
+    raise 'Software has crashed! Please restart experiment.'
+  end
+
+  #Check if we have an Error window.
+  if AutoItX3::Window.exists?('Error')
+    raise 'Software has an error! Please restart experiment.'
+  end
+
+  #Check if experiment has completed with the menu method.
+  #TODO: Implement the pixel detection method.
+  AutoItX3.send_keys('!vl') #view -> data listing
+  #Wait for some timeout time so that we don't accidentally miss the window.
+  #NOTE: This will add to our status_check_interval...
+  if AutoItX3::Window.wait('Data List', '', DATA_LIST_WINDOW_TIMEOUT)
+    #Close the window
+    AutoItX3.send_keys('{ENTER}')
+    #Make sure that window does not exist anymore
+    raise 'Data list window still exists!' if AutoItX3.Window.exists?('Data List')
+
+    #Experiment has completed!
+    puts 'Experiment is complete!'
+    break
+  end
+  total_runtime += DATA_LIST_WINDOW_TIMEOUT
+
+  #Check if our total runtime is grossly above the expected runtime. If so, 
+  #we can assume that the experiment is frozen or crashed and end the experiment.
+  if total_runtime >= status_max_runtime
+    raise 'Exceeded maximum runtime! Software may have crashed!'
+  end
+
+  print '.' #for progress
 end
+
+
+#If we get here, everything went well! Now save the file.
+AutoItX3.send_keys('!fa') #file -> save as
+AutoItX3::Window.wait('Save As')
+saveas_window = AutoItX3::Window.new('Save As')
+#Focus on the filename box
+saveas_filename = AutoItX3::Control.new('Save As', '', 'Edit1')
+saveas_filename.send_keys(saveas_filename)
+saveas_filename.send_keys('{ENTER}')
+
+
+#Then close the file to get to a clean slate again
+AutoItX3.send_keys('!fc') #file -> close
+
+
+
