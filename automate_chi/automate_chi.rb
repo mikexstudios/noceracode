@@ -49,7 +49,7 @@ AutoItX3.send_keys('!st') #open up the system -> techniques window
 AutoItX3::Window.wait('Electrochemical Techniques')
 #Single left click the chronopotentiometry item (at relative coordinates 55, 321)
 techniques = AutoItX3::Control.new('Electrochemical Techniques', '', 1000)
-techniques.click('left', 1, 55, 321)
+techniques.click('left', 1, 55, 334)
 techniques.send_keys('{ENTER}') #OK button
 
 AutoItX3::Window.wait('Chronopotentiometry Parameters')
