@@ -123,7 +123,7 @@ while true
     #Close the window
     AutoItX3.send_keys('{ENTER}')
     #Make sure that window does not exist anymore
-    raise 'Data list window still exists!' if AutoItX3.Window.exists?('Data List')
+    raise 'Data list window still exists!' if AutoItX3::Window.exists?('Data List')
 
     #Experiment has completed!
     puts 'Experiment is complete!'
