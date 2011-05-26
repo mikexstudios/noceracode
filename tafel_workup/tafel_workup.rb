@@ -51,7 +51,7 @@ UNCOMPENSATED_RESISTANCE=#{$uncompensated_resistance}
     $pass.each_pair do |pass, max_datapoint|
         #For now, let's not worry about setting datapoint range.
         #(1..max_datapoint).each do |datapoint|
-            f.puts "tafel_cp -f 'cp%d_#{pass}.txt' -u $UNCOMPENSATED_RESISTANCE | tee tafel_#{pass}.csv"
+            f.puts "tafel_generate -f 'cp%d_#{pass}.txt' -u $UNCOMPENSATED_RESISTANCE | tee tafel_#{pass}.csv"
             f.puts 'echo'
         #end
     end
