@@ -158,7 +158,7 @@ AutoItX3::Window.wait('Save As')
 
 #We don't use the control's send keys because of errors, instead we just use
 #standard keyboard input.
-AutoItX3.send_keys(saveas_filename)
+AutoItX3.send_keys(save_file_as)
 AutoItX3.send_keys('{ENTER}')
 
 
