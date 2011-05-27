@@ -148,10 +148,11 @@ end
 
 #If we get here, everything went well! Now save the file.
 AutoItX3.send_keys('!fa') #file -> save as
-AutoItX3::Window.wait_active('Save As')
+AutoItX3::Window.wait('Save As')
+saveas_window = AutoItX3::Window.new('Save As')
+saveas_window.wait_active
 
 #The following does not work:
-#saveas_window = AutoItX3::Window.new('Save As')
 ##Focus on the filename box
 #saveas_filename = AutoItX3::Control.new('Save As', '', 'Edit1')
 #saveas_filename.focus
