@@ -159,6 +159,7 @@ saveas_window.wait_active
 
 #We don't use the control's send keys because of errors, instead we just use
 #standard keyboard input.
+AutoItX3.msleep(2000) #2 sec, need some extra time to give right focus on edit field
 AutoItX3.send_keys(save_file_as)
 AutoItX3.send_keys('{ENTER}')
 
