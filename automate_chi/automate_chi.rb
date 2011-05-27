@@ -15,11 +15,11 @@ save_filename = 'test1.bin'
 #      is set to the directory where we want to save our files.
 #save_directory = File.expand_path(File.dirname(__FILE__))
 
-
 status_check_interval = 10 #sec
-#When our runtime exceeds the maximum runtime given below, we assume the experiment
+#When our runtime exceeds the maximum runtime given below, we assume the experi
 #has crashed and exit from loop.
 status_max_runtime = anodic_time * 1.5 #sec
+
 
 #Other constants
 NETBOOK_SCREEN = [1040, 586] #px
@@ -116,7 +116,7 @@ class EchemSoftware
     AutoItX3.send_keys('{ENTER}') #OK button
   end
 
-  def run
+  def run(check_interval = 10, max_runtime = nil)
     @main_window.activate
     AutoItX3.send_keys('!cr') #control -> run experiment
 
@@ -134,8 +134,8 @@ class EchemSoftware
     #TODO: Don't use a counter for time. Instead, use the computer's clock.
     total_runtime = 0 #sec, we keep track of how long the expt has run
     while true
-      sleep(status_check_interval)
-      total_runtime += status_check_interval
+      sleep(check_interval)
+      total_runtime += check_interval
     
       #Check if program has crashed.
       if @main_window.hung?
@@ -167,7 +167,7 @@ class EchemSoftware
     
       #Check if our total runtime is grossly above the expected runtime. If so, 
       #we can assume that the experiment is frozen or crashed and end the experiment.
-      if total_runtime >= status_max_runtime
+      if max_runtime != nil and total_runtime >= max_runtime
         raise 'Exceeded maximum runtime! Software may have crashed!'
       end
     
@@ -206,7 +206,7 @@ es = EchemSoftware.new
 es.setup_chronopotentiometry(0, anodic_current, potential_range.last, 
                              potential_range.first, 1, anodic_time, 
                              'a', 1)
-es.run
+es.run(status_check_interval, status_max_runtime)
 es.save_as(save_filename)
 es.kill
 
