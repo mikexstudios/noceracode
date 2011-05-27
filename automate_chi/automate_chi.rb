@@ -124,10 +124,11 @@ while true
   #Wait for some timeout time so that we don't accidentally miss the window.
   #NOTE: This will add to our status_check_interval...
   if AutoItX3::Window.wait('Data List', '', DATA_LIST_WINDOW_TIMEOUT)
+    datalist_window = AutoItX3::Window.new('Data List')
     #Close the window
-    AutoItX3.send_keys('{ENTER}')
+    datalist_window.close
     #Make sure that window does not exist anymore
-    raise 'Data list window still exists!' if AutoItX3::Window.exists?('Data List')
+    datalist_window.wait_close
 
     #Experiment has completed!
     puts 'Experiment is complete!'
@@ -153,6 +154,7 @@ saveas_window = AutoItX3::Window.new('Save As')
 saveas_filename = AutoItX3::Control.new('Save As', '', 'Edit1')
 saveas_filename.send_keys(saveas_filename)
 saveas_filename.send_keys('{ENTER}')
+saveas_filename.wait_close
 
 
 #Then close the file to get to a clean slate again
