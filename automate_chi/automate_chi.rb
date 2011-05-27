@@ -2,6 +2,10 @@ require 'au3' # make sure the AutoItX3.dll is in the same directory
 #require 'ruby-debug'
 #include AutoItX3 # useful if you don't want to always use AutoItX3:: before everything
 
+#TO THINK: Is there an easy way to set the path of saved files? The current path is
+#being set in the cfg file, but the format looks ugly to touch. Need to figure out
+#how to modify that file.
+
 #Experiment variables
 anodic_current = 1e-3 #A
 anodic_time = 30 #sec
@@ -166,5 +170,6 @@ AutoItX3.send_keys('{ENTER}')
 #Then close the file to get to a clean slate again
 AutoItX3.send_keys('!fc') #file -> close
 
+#TODO: Create new expt (file -> new) and expand window again.
 
 
