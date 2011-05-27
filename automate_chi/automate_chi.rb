@@ -6,21 +6,6 @@ require 'au3' # make sure the AutoItX3.dll is in the same directory
 #being set in the cfg file, but the format looks ugly to touch. Need to figure out
 #how to modify that file.
 
-#Experiment variables
-anodic_current = 1e-3 #A
-anodic_time = 30 #sec
-potential_range = [0, 2] #low, high V
-save_filename = 'test1.bin'
-#NOTE: Before we start the script, we have to make sure that the program's CWD
-#      is set to the directory where we want to save our files.
-#save_directory = File.expand_path(File.dirname(__FILE__))
-
-status_check_interval = 10 #sec
-#When our runtime exceeds the maximum runtime given below, we assume the experi
-#has crashed and exit from loop.
-status_max_runtime = anodic_time * 1.5 #sec
-
-
 #Other constants
 NETBOOK_SCREEN = [1040, 586] #px
 DATA_LIST_WINDOW_TIMEOUT = 5 #sec
@@ -200,14 +185,5 @@ class EchemSoftware
     AutoItX3.send_keys('!fc') #file -> close
   end
 end
-
-
-es = EchemSoftware.new
-es.setup_chronopotentiometry(0, anodic_current, potential_range.last, 
-                             potential_range.first, 1, anodic_time, 
-                             'a', 1)
-es.run(status_check_interval, status_max_runtime)
-es.save_as(save_filename)
-es.kill
 
 #TODO: Create new expt (file -> new) and expand window again.
