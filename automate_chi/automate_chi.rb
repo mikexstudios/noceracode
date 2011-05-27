@@ -11,6 +11,10 @@ anodic_current = 1e-3 #A
 anodic_time = 30 #sec
 potential_range = [0, 2] #low, high V
 save_file_as = 'test1.bin'
+#NOTE: Before we start the script, we have to make sure that the program's CWD
+#      is set to the directory where we want to save our files.
+#save_directory = File.expand_path(File.dirname(__FILE__))
+
 
 status_check_interval = 10 #sec
 #When our runtime exceeds the maximum runtime given below, we assume the experiment
