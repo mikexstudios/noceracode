@@ -152,8 +152,11 @@ AutoItX3::Window.wait('Save As')
 saveas_window = AutoItX3::Window.new('Save As')
 #Focus on the filename box
 saveas_filename = AutoItX3::Control.new('Save As', '', 'Edit1')
-saveas_filename.send_keys(saveas_filename)
-saveas_filename.send_keys('{ENTER}')
+saveas_filename.focus
+#We don't use the control's send keys because of errors, instead we just use
+#standard keyboard input.
+AutoItX3.send_keys(saveas_filename)
+AutoItX3.send_keys('{ENTER}')
 saveas_filename.wait_close
 
 
