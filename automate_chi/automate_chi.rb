@@ -34,7 +34,8 @@ class AutoItX3::Window
   end
 end
 
-AutoItX3.run('chi760d.exe')
+#AutoItX3.block_input = true
+#AutoItX3.run('chi760d.exe')
 #Set title matching criterion looser: 2 = Match any substring in the title.
 AutoItX3.set_option('WinTitleMatchMode', 2)
 
@@ -53,6 +54,7 @@ end
 #      title actually changes! The only common part is 'Electrochemical'.
 AutoItX3::Window.wait('Electrochemical')
 main_window = AutoItX3::Window.new('Electrochemical')
+main_window.activate #sets focus to window
 
 # NORMALIZE WINDOW SIZE
 #We want to set the main window to a specific size so that our pixel matching
@@ -62,6 +64,7 @@ main_window.move(0, 0, NETBOOK_SCREEN.first, NETBOOK_SCREEN.last)
 AutoItX3.send_keys('!-x') # ALT+- accesses child window options. Then x to max.
 
 
+main_window.activate #sets focus to window
 AutoItX3.send_keys('!st') #open up the system -> techniques window
 AutoItX3::Window.wait('Electrochemical Techniques')
 #Single left click the chronopotentiometry item (at relative coordinates 55, 321)
@@ -174,3 +177,4 @@ AutoItX3.send_keys('!fc') #file -> close
 #TODO: Create new expt (file -> new) and expand window again.
 
 
+#AutoItX3.block_input = false
