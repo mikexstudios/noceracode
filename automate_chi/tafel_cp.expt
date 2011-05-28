@@ -17,10 +17,22 @@ status_check_interval = 10 #sec
 status_max_runtime = anodic_time * 1.5 #sec
 
 
-es = EchemSoftware.new
-es.setup_chronopotentiometry(0, anodic_current, potential_range.last, 
-                             potential_range.first, 1, anodic_time, 
-                             'a', 1)
-es.run(status_check_interval, status_max_runtime)
-es.save_as(save_filename)
-es.kill
+begin
+  es = EchemSoftware.new
+  es.setup_chronopotentiometry(0, anodic_current, potential_range.last, 
+                               potential_range.first, 1, anodic_time, 
+                               'a', 1)
+  es.run(status_check_interval, status_max_runtime)
+  es.save_as(save_filename)
+rescue RuntimeError
+  puts 'RuntimeError: Retrying experiment...'
+  #Getting here means that the software has crashed. So let's try to restart
+  #it again.
+  es.kill
+  retry
+ensure
+  if es #when we have errors, es is automatically GC'ed and set to nil.
+    es.kill
+    es = nil
+  end
+end

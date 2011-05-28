@@ -29,7 +29,7 @@ class EchemSoftware
     
     #Check if another instance of the software is running. If so, we cannot start
     #ours.
-    raise 'Software already running!' if AutoItX3::Window.exists?('Electrochemical')
+    raise LoadError, 'Software already running!' if AutoItX3::Window.exists?('Electrochemical')
 
     @main_pid = AutoItX3.run('chi760d.exe')
     #Set title matching criterion looser: 2 = Match any substring in the title.
@@ -42,7 +42,7 @@ class EchemSoftware
     if AutoItX3::Window.exists?('Error')
       AutoItX3.send_keys('{ENTER}')
       #AutoItX3.send_keys('!fx') # file -> exit
-      #raise 'Potentiostat not turned on.'
+      #raise LoadError, 'Potentiostat not turned on.'
     end
     
     #Wait for main window to exist
@@ -64,6 +64,7 @@ class EchemSoftware
   
   def kill
     AutoItX3.close_process(@main_pid)
+    AutoItX3.wait_for_process_close(@main_pid)
     AutoItX3.block_input = false
   end
 
@@ -124,12 +125,12 @@ class EchemSoftware
     
       #Check if program has crashed.
       if @main_window.hung?
-        raise 'Software has crashed! Please restart experiment.'
+        raise RuntimeError, 'Software has crashed! Please restart experiment.'
       end
     
       #Check if we have an Error window.
       if AutoItX3::Window.exists?('Error')
-        raise 'Software has an error! Please restart experiment.'
+        raise RuntimeError, 'Software has an error! Please restart experiment.'
       end
     
       #Check if experiment has completed with the menu method.
@@ -153,7 +154,7 @@ class EchemSoftware
       #Check if our total runtime is grossly above the expected runtime. If so, 
       #we can assume that the experiment is frozen or crashed and end the experiment.
       if max_runtime != nil and total_runtime >= max_runtime
-        raise 'Exceeded maximum runtime! Software may have crashed!'
+        raise RuntimeError, 'Exceeded maximum runtime! Software may have crashed!'
       end
     
       print '.' #for progress
