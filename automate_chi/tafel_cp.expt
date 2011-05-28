@@ -5,11 +5,11 @@ require './automate_chi.rb'
 def run_cp
   begin
     es = EchemSoftware.new
-    es.setup_chronopotentiometry(0, anodic_current, potential_range.last, 
-                                 potential_range.first, 1, anodic_time, 
+    es.setup_chronopotentiometry(0, @anodic_current, @potential_range.last, 
+                                 @potential_range.first, 1, @anodic_time, 
                                  'a', 1)
-    es.run(status_check_interval, status_max_runtime)
-    es.save_as(save_filename)
+    es.run(@status_check_interval, @status_max_runtime)
+    es.save_as(@save_filename)
   rescue RuntimeError
     puts 'RuntimeError: Retrying experiment...'
     #Getting here means that the software has crashed. So let's try to restart
@@ -32,7 +32,7 @@ end
 @status_check_interval = 10 #sec
 #When our runtime exceeds the maximum runtime given below, we assume the experi
 #has crashed and exit from loop.
-@status_max_runtime = anodic_time + 120 #sec
+@status_max_runtime = @anodic_time + 120 #sec
 
 #These are L->H points
 save_prefix = 'cp'
