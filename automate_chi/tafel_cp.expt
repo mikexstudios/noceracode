@@ -2,37 +2,267 @@
 
 require './automate_chi.rb'
 
-#Experiment variables
-anodic_current = 1e-3 #A
-anodic_time = 30 #sec
-potential_range = [0, 2] #low, high V
-save_filename = 'test1.bin'
-#NOTE: Before we start the script, we have to make sure that the program's CWD
-#      is set to the directory where we want to save our files.
-#save_directory = File.expand_path(File.dirname(__FILE__))
+def run_cp
+  begin
+    es = EchemSoftware.new
+    es.setup_chronopotentiometry(0, anodic_current, potential_range.last, 
+                                 potential_range.first, 1, anodic_time, 
+                                 'a', 1)
+    es.run(status_check_interval, status_max_runtime)
+    es.save_as(save_filename)
+  rescue RuntimeError
+    puts 'RuntimeError: Retrying experiment...'
+    #Getting here means that the software has crashed. So let's try to restart
+    #it again.
+    es.kill
+    retry
+  ensure
+    if es #when we have errors, es is automatically GC'ed and set to nil.
+      es.kill
+      es = nil
+    end
+  end
+end
 
-status_check_interval = 10 #sec
+#Experiment variables
+#@anodic_current = 1e-3 #A
+@anodic_time = 300 #sec
+@potential_range = [0, 3] #low, high V
+
+@status_check_interval = 10 #sec
 #When our runtime exceeds the maximum runtime given below, we assume the experi
 #has crashed and exit from loop.
-status_max_runtime = anodic_time * 1.5 #sec
+@status_max_runtime = anodic_time + 120 #sec
 
+#These are L->H points
+save_prefix = 'cp'
+for pass in 1..6
+  if pass == 1
+    @anodic_time    = 10800
+  else
+    @anodic_time    = 300
+  end
+  @anodic_current = 1.00e-06
+  @save_filename  = '%s01_%i.bin' % [save_prefix, pass]
+  run_cp
 
-begin
-  es = EchemSoftware.new
-  es.setup_chronopotentiometry(0, anodic_current, potential_range.last, 
-                               potential_range.first, 1, anodic_time, 
-                               'a', 1)
-  es.run(status_check_interval, status_max_runtime)
-  es.save_as(save_filename)
-rescue RuntimeError
-  puts 'RuntimeError: Retrying experiment...'
-  #Getting here means that the software has crashed. So let's try to restart
-  #it again.
-  es.kill
-  retry
-ensure
-  if es #when we have errors, es is automatically GC'ed and set to nil.
-    es.kill
-    es = nil
+  @anodic_time    = 300
+
+  @anodic_current = 1.78e-06
+  @save_filename  = '%s02_%i.bin' % [save_prefix, pass]
+  run_cp
+  
+  @anodic_current = 3.16e-06
+  @save_filename  = '%s03_%i.bin' % [save_prefix, pass]
+  run_cp
+  
+  @anodic_current = 5.62e-06
+  @save_filename  = '%s04_%i.bin' % [save_prefix, pass]
+  run_cp
+  
+  @anodic_current = 1.00e-05
+  @save_filename  = '%s05_%i.bin' % [save_prefix, pass]
+  run_cp
+  
+  @anodic_current = 1.78e-05
+  @save_filename  = '%s06_%i.bin' % [save_prefix, pass]
+  run_cp
+  
+  @anodic_current = 3.16e-05
+  @save_filename  = '%s07_%i.bin' % [save_prefix, pass]
+  run_cp
+  
+  @anodic_current = 5.62e-05
+  @save_filename  = '%s08_%i.bin' % [save_prefix, pass]
+  run_cp
+  
+  @anodic_current = 1.00e-04
+  @save_filename  = '%s09_%i.bin' % [save_prefix, pass]
+  run_cp
+  
+  @anodic_current = 1.78e-04
+  @save_filename  = '%s10_%i.bin' % [save_prefix, pass]
+  run_cp
+  
+  @anodic_current = 3.16e-04
+  @save_filename  = '%s11_%i.bin' % [save_prefix, pass]
+  run_cp
+  
+  @anodic_current = 5.62e-04
+  @save_filename  = '%s12_%i.bin' % [save_prefix, pass]
+  run_cp
+  
+  @anodic_current = 1.00e-03
+  @save_filename  = '%s13_%i.bin' % [save_prefix, pass]
+  run_cp
+end
+
+save_prefix = 'bcp'
+for pass in 1..6
+  @anodic_time    = 300
+
+  @anodic_current = 1.00e-03
+  @save_filename  = '%s01_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 5.62e-04
+  @save_filename  = '%s02_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 3.16e-04
+  @save_filename  = '%s03_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 1.78e-04
+  @save_filename  = '%s04_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 1.00e-04
+  @save_filename  = '%s05_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 5.62e-05
+  @save_filename  = '%s06_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 3.16e-05
+  @save_filename  = '%s07_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 1.78e-05
+  @save_filename  = '%s08_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 1.00e-05
+  @save_filename  = '%s09_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 5.62e-06
+  @save_filename  = '%s10_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 3.16e-06
+  @save_filename  = '%s11_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 1.78e-06
+  @save_filename  = '%s12_%i' % [save_prefix, pass] 
+  run_cp
+  
+  @anodic_current = 1.00e-06
+  @save_filename  = '%s13_%i' % [save_prefix, pass]
+  run_cp
+end
+
+save_prefix = 'ccp'
+for pass in 1..6
+  if pass.odd? #odd passes are H->L
+    @anodic_time    = 300
+
+    @anodic_current = 1.00e-03
+    @save_filename  = '%s01_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 5.62e-04
+    @save_filename  = '%s02_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 3.16e-04
+    @save_filename  = '%s03_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 1.78e-04
+    @save_filename  = '%s04_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 1.00e-04
+    @save_filename  = '%s05_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 5.62e-05
+    @save_filename  = '%s06_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 3.16e-05
+    @save_filename  = '%s07_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 1.78e-05
+    @save_filename  = '%s08_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 1.00e-05
+    @save_filename  = '%s09_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 5.62e-06
+    @save_filename  = '%s010_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 3.16e-06
+    @save_filename  = '%s011_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 1.78e-06
+    @save_filename  = '%s012_%i' % [save_prefix, pass] 
+    run_cp
+    
+    @anodic_current = 1.00e-06
+    @save_filename  = '%s013_%i' % [save_prefix, pass]
+    run_cp
+  else #even is L->H
+    @anodic_time    = 300
+
+    @anodic_current = 1.00e-06
+    @save_filename  = '%s01_%i.bin' % [save_prefix, pass]
+    run_cp
+
+    @anodic_current = 1.78e-06
+    @save_filename  = '%s02_%i.bin' % [save_prefix, pass]
+    run_cp
+    
+    @anodic_current = 3.16e-06
+    @save_filename  = '%s03_%i.bin' % [save_prefix, pass]
+    run_cp
+    
+    @anodic_current = 5.62e-06
+    @save_filename  = '%s04_%i.bin' % [save_prefix, pass]
+    run_cp
+    
+    @anodic_current = 1.00e-05
+    @save_filename  = '%s05_%i.bin' % [save_prefix, pass]
+    run_cp
+    
+    @anodic_current = 1.78e-05
+    @save_filename  = '%s06_%i.bin' % [save_prefix, pass]
+    run_cp
+    
+    @anodic_current = 3.16e-05
+    @save_filename  = '%s07_%i.bin' % [save_prefix, pass]
+    run_cp
+    
+    @anodic_current = 5.62e-05
+    @save_filename  = '%s08_%i.bin' % [save_prefix, pass]
+    run_cp
+    
+    @anodic_current = 1.00e-04
+    @save_filename  = '%s09_%i.bin' % [save_prefix, pass]
+    run_cp
+    
+    @anodic_current = 1.78e-04
+    @save_filename  = '%s10_%i.bin' % [save_prefix, pass]
+    run_cp
+    
+    @anodic_current = 3.16e-04
+    @save_filename  = '%s11_%i.bin' % [save_prefix, pass]
+    run_cp
+    
+    @anodic_current = 5.62e-04
+    @save_filename  = '%s12_%i.bin' % [save_prefix, pass]
+    run_cp
+    
+    @anodic_current = 1.00e-03
+    @save_filename  = '%s13_%i.bin' % [save_prefix, pass]
+    run_cp
   end
 end
