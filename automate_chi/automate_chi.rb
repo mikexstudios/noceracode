@@ -177,11 +177,21 @@ class EchemSoftware
   def save_as(filename)
     $log.debug 'Saving as...'
 
-    @main_window.activate
-    AutoItX3.send_keys('!fa') #file -> save as
-    AutoItX3::Window.wait('Save As')
-    saveas_window = AutoItX3::Window.new('Save As')
-    saveas_window.wait_active
+    begin
+      @main_window.activate
+      AutoItX3.send_keys('!fa') #file -> save as
+      AutoItX3::Window.wait('Save As')
+      saveas_window = AutoItX3::Window.new('Save As')
+      if not saveas_window.wait_active(timeout = 60) 
+        $log.error 'Save As window not found.'
+        raise RuntimeError, 'Save As window not found!'
+      end
+    rescue RuntimeError
+      $log.info 'Retrying Save As...'
+      AutoItX3.send_keys('{ESC}{ESC}')
+      sleep('60') #sec
+      retry
+    end
     
     #The following does not work:
     ##Focus on the filename box
