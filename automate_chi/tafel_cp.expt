@@ -3,26 +3,32 @@
 require './automate_chi.rb'
 
 def run_cp
+  puts '-------------------------------------'
   begin
     es = EchemSoftware.new
+    @log.info 'Running CP experiment with filename: %s' % @save_filename
     es.setup_chronopotentiometry(0, @anodic_current, @potential_range.last, 
                                  @potential_range.first, 1, @anodic_time, 
                                  'a', 1)
     es.run(@status_check_interval, @status_max_runtime)
     es.save_as(@save_filename)
   rescue RuntimeError
-    puts 'RuntimeError: Retrying experiment...'
+    @log.error 'RuntimeError: Retrying experiment...'
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-	sleep(600) #10 minutes to let instrument rest
+    @log.info 'Killing program and sleeping for a bit...'
+    sleep(600) #10 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
+      @log.info 'Killing program through ensure...'
       es.kill
       es = nil
     end
   end
+  puts '-------------------------------------'
+  puts
 end
 
 #Experiment variables
@@ -198,19 +204,19 @@ for pass in 1..6
     run_cp
     
     @anodic_current = 5.62e-06
-    @save_filename  = '%s010_%i' % [save_prefix, pass] 
+    @save_filename  = '%s10_%i' % [save_prefix, pass] 
     run_cp
     
     @anodic_current = 3.16e-06
-    @save_filename  = '%s011_%i' % [save_prefix, pass] 
+    @save_filename  = '%s11_%i' % [save_prefix, pass] 
     run_cp
     
     @anodic_current = 1.78e-06
-    @save_filename  = '%s012_%i' % [save_prefix, pass] 
+    @save_filename  = '%s12_%i' % [save_prefix, pass] 
     run_cp
     
     @anodic_current = 1.00e-06
-    @save_filename  = '%s013_%i' % [save_prefix, pass]
+    @save_filename  = '%s13_%i' % [save_prefix, pass]
     run_cp
   else #even is L->H
     @anodic_time    = 300
