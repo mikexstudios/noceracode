@@ -15,6 +15,7 @@ def run_cp
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
+	sleep(600) #10 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
@@ -29,7 +30,7 @@ end
 @anodic_time = 300 #sec
 @potential_range = [0, 3] #low, high V
 
-@status_check_interval = 10 #sec
+@status_check_interval = 60 #sec
 #When our runtime exceeds the maximum runtime given below, we assume the experi
 #has crashed and exit from loop.
 @status_max_runtime = @anodic_time + 120 #sec
@@ -38,13 +39,14 @@ end
 save_prefix = 'cp'
 for pass in 1..6
   if pass == 1
-    @anodic_time    = 10800
+    #@anodic_time    = 10800
+    @anodic_time    = 300
   else
     @anodic_time    = 300
   end
   @anodic_current = 1.00e-06
   @save_filename  = '%s01_%i.bin' % [save_prefix, pass]
-  run_cp
+  #run_cp
 
   @anodic_time    = 300
 
