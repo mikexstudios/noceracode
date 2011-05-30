@@ -2,8 +2,8 @@ require 'au3' # make sure the AutoItX3.dll is in the same directory
 #require 'ruby-debug'
 #include AutoItX3 # useful if you don't want to always use AutoItX3:: before everything
 require 'logger'
-@log = Logger.new(STDOUT)
-@log.level = Logger::DEBUG
+$log = Logger.new(STDOUT)
+$log.level = Logger::DEBUG
 
 #TO THINK: Is there an easy way to set the path of saved files? The current path is
 #being set in the cfg file, but the format looks ugly to touch. Need to figure out
@@ -28,7 +28,7 @@ end
 
 class EchemSoftware
   def initialize
-    @log.debug 'Initializing echem program...'
+    $log.debug 'Initializing echem program...'
     #AutoItX3.block_input = true
     
     #Check if another instance of the software is running. If so, we cannot start
@@ -44,7 +44,7 @@ class EchemSoftware
     #      handle to the window.
     AutoItX3::Window.wait('Error', '', 2) #wait for 2 sec so that we don't miss the Error window
     if AutoItX3::Window.exists?('Error')
-      @log.warn 'Error: Link failed window exists. Closing it...'
+      $log.warn 'Error: Link failed window exists. Closing it...'
       AutoItX3.send_keys('{ENTER}')
       #AutoItX3.send_keys('!fx') # file -> exit
       #raise LoadError, 'Potentiostat not turned on.'
@@ -60,7 +60,7 @@ class EchemSoftware
     # NORMALIZE WINDOW SIZE
     #We want to set the main window to a specific size so that our pixel matching
     #code is consistent across computers.
-    @log.debug 'Normalizing window size...'
+    $log.debug 'Normalizing window size...'
     @main_window.move(0, 0, NETBOOK_SCREEN.first, NETBOOK_SCREEN.last)
     #Maximize the child window
     AutoItX3.send_keys('!-x') # ALT+- accesses child window options. Then x to max.
@@ -69,7 +69,7 @@ class EchemSoftware
   end
   
   def kill
-    @log.debug 'Killing echem software...'
+    $log.debug 'Killing echem software...'
     AutoItX3.close_process(@main_pid)
     AutoItX3.wait_for_process_close(@main_pid)
     AutoItX3.block_input = false
@@ -78,7 +78,7 @@ class EchemSoftware
   def setup_chronopotentiometry(cathodic_current, anodic_current, high_e, low_e,
                                 cathodic_time, anodic_time, initial_polarity, 
                                 data_storage_interval)
-    @log.debug 'Setting up chronopotentiometry experiment...'
+    $log.debug 'Setting up chronopotentiometry experiment...'
 
     @main_window.activate #sets focus to window
     AutoItX3.send_keys('!st') #open up the system -> techniques window
@@ -112,7 +112,7 @@ class EchemSoftware
   end
 
   def run(check_interval = 10, max_runtime = nil)
-    @log.debug 'Running experiment...'
+    $log.debug 'Running experiment...'
     @main_window.activate
     AutoItX3.send_keys('!cr') #control -> run experiment
 
@@ -135,13 +135,13 @@ class EchemSoftware
     
       #Check if program has crashed.
       if @main_window.hung?
-        @log.error 'Detected main window hung.'
+        $log.error 'Detected main window hung.'
         raise RuntimeError, 'Software has crashed! Please restart experiment.'
       end
     
       #Check if we have an Error window.
       if AutoItX3::Window.exists?('Error')
-        @log.error 'Detected Error window (probably Link Failed).'
+        $log.error 'Detected Error window (probably Link Failed).'
         raise RuntimeError, 'Software has an error! Please restart experiment.'
       end
     
@@ -151,7 +151,7 @@ class EchemSoftware
       #Wait for some timeout time so that we don't accidentally miss the window.
       #NOTE: This will add to our status_check_interval...
       if AutoItX3::Window.wait('Data List', '', DATA_LIST_WINDOW_TIMEOUT)
-        @log.info 'Data List window found! Assuming experiment has ended.'
+        $log.info 'Data List window found! Assuming experiment has ended.'
         datalist_window = AutoItX3::Window.new('Data List')
         #Close the window
         datalist_window.close
@@ -166,7 +166,7 @@ class EchemSoftware
       #Check if our total runtime is grossly above the expected runtime. If so, 
       #we can assume that the experiment is frozen or crashed and end the experiment.
       if max_runtime != nil and total_runtime >= max_runtime
-        @log.error 'Exceeded maximum runtime. Software may have crashed.'
+        $log.error 'Exceeded maximum runtime. Software may have crashed.'
         raise RuntimeError, 'Exceeded maximum runtime! Software may have crashed!'
       end
     
@@ -175,7 +175,7 @@ class EchemSoftware
   end
 
   def save_as(filename)
-    @log.debug 'Saving as...'
+    $log.debug 'Saving as...'
 
     @main_window.activate
     AutoItX3.send_keys('!fa') #file -> save as
@@ -197,7 +197,7 @@ class EchemSoftware
   end
 
   def close
-    @log.debug 'Closing program...'
+    $log.debug 'Closing program...'
 
     # close gets us back to a clean slate again.
     AutoItX3.send_keys('!fc') #file -> close
