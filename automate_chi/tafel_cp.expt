@@ -5,8 +5,8 @@ require './automate_chi.rb'
 def run_cp
   puts '-------------------------------------'
   begin
-    es = EchemSoftware.new
     $log.info 'Running CP experiment with filename: %s' % @save_filename
+    es = EchemSoftware.new
     es.setup_chronopotentiometry(0, @anodic_current, @potential_range.last, 
                                  @potential_range.first, 1, @anodic_time, 
                                  'a', 1)
