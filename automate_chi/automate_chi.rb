@@ -3,6 +3,7 @@ require 'au3' # make sure the AutoItX3.dll is in the same directory
 #include AutoItX3 # useful if you don't want to always use AutoItX3:: before everything
 require 'logger'
 @log = Logger.new(STDOUT)
+@log.level = Logger::DEBUG
 
 #TO THINK: Is there an easy way to set the path of saved files? The current path is
 #being set in the cfg file, but the format looks ugly to touch. Need to figure out
