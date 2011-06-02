@@ -32,7 +32,12 @@ class TafelPlot
     @title = ''
     @x_label = 'log(i / A/cm^2)'
     @y_label = 'E / V (vs Ag/AgCl)'
+    @color = 'black'
     @fit_color = 'red'
+
+    #For multiple plots, we need to keep track if we already used the `plot`
+    #command. If so, the subsequent plots are drawn with `points`.
+    @already_drawn = false
   end
 
   def points
@@ -86,8 +91,6 @@ class TafelPlot
                                    coefficients[:intercept][:std_error]]
     puts 'R^2:       %6.2f' % [r_squared * 100]
     puts
-
-
   end
 
   def draw
@@ -95,7 +98,11 @@ class TafelPlot
     t = @r.read_csv(file = @input, header = false)
     @x = t['V1'] #for convenience
     @y = t['V2']
-    @r.plot(@x, @y, plot_arguments)
+    if not @already_drawn
+      @r.plot(@x, @y, plot_arguments)
+    else
+      @r.points(@x, @y, plot_arguments)
+    end
   end
 
   def save
@@ -107,10 +114,13 @@ class TafelPlot
   # Check for set class variables and then return a hash of arguments
   def plot_arguments
     args = {}
-    args[:main] = @title if not @title.empty?
-    #Always include x and y axes labels
-    args[:xlab] = @x_label
-    args[:ylab] = @y_label
+    if not @already_drawn
+      args[:main] = @title if not @title.empty?
+      #Always include x and y axes labels
+      args[:xlab] = @x_label
+      args[:ylab] = @y_label
+    end
+    args[:col] = @color
 
     return args
   end
@@ -128,6 +138,7 @@ tafel_plot do |plot|
   #plot.points [3, 5], 6, [8-13]
   plot.draw
   plot.linear_fit #can optionally specify pt range
+
   plot.save
 end
 
