@@ -32,18 +32,40 @@ class TafelPlot
     @title = ''
     @x_label = 'log(i / A/cm^2)'
     @y_label = 'E / V (vs Ag/AgCl)'
+    @fit_color = 'red'
   end
 
   def points
   end
 
   def linear_fit
+    raise "Need to call 'draw' first before fitting!" if not defined? @x
+
+    #See: http://goo.gl/lAsEB for example using rsruby to fit line.
+    #rsruby is not very advanced, so need to manually assign in the variables
+    @r.assign('x', @x)
+    @r.assign('y', @y)
+
+    fit = @r.lm('y ~ x') #linear model of y = m*x + b
+    coefficients = fit['coefficients']
+    coefficients = { :slope => coefficients['x'], 
+                     :intercept => coefficients['(Intercept)'] }
+
+    #Since color and other such parameters can be specified anywhere in R, we 
+    #need to mirror that by attaching a hash at the end.
+    @r.abline(coefficients[:intercept], coefficients[:slope], 
+              { :col => @fit_color })
   end
 
   def draw
     @r.pdf(@output)
     t = @r.read_csv(file = @input, header = false)
-    @r.plot(t['V1'], t['V2'], plot_arguments)
+    @x = t['V1'] #for convenience
+    @y = t['V2']
+    @r.plot(@x, @y, plot_arguments)
+  end
+
+  def save
     @r.dev_off.call #need .call or else we are just accessing the dev_off obj.
   end
 
@@ -71,8 +93,9 @@ tafel_plot do |plot|
   plot.output = 'tafel_1.pdf'
   plot.title = $plot_title
   #plot.points [3, 5], 6, [8-13]
-  plot.linear_fit #can optionally specify pt range
   plot.draw
+  plot.linear_fit #can optionally specify pt range
+  plot.save
 end
 
 exit
