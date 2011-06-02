@@ -9,7 +9,8 @@ class TafelExtractor
 
   def process(input_file, output_file)
     @uncompensated_resistance = @uncompensated_resistance.to_f
-    
+
+    output = File.new(output_file, 'w')
     #Get list of files from the input_file glob. We assume they are in the
     #correct order by filename.
     Dir[input_file].each do |filename|
@@ -34,8 +35,9 @@ class TafelExtractor
       potential = potential - current * uncompensated_resistance
           
       #Put out scientifically
-      puts '%e, %e' % [$logcurrent, $potential]
+      output.puts '%e, %e' % [logcurrent, potential]
     end #Dir
+    output.close
   end
 
   private
@@ -84,14 +86,6 @@ def cp_to_tafel
   yield TafelExtractor.new('cp')
 end
 
-cp_to_tafel do |convert|
-  convert.uncompensated_resistance = 23.7
-  convert.process 'cp%d_1.txt', 'tafel_1.csv'
-end
-
-exit
-
-
 # Example session for plotting
 
 $uncompensated_resistance = 23.7 #ohms
@@ -103,12 +97,14 @@ $combined_ylim = [0.58, 1.03]
 cp_to_tafel do |convert|
   convert.uncompensated_resistance = $uncompensated_resistance
   convert.process 'cp%d_1.txt', 'tafel_1.csv'
-  convert.process 'cp%d_2.txt', 'tafel_2.csv'
-  convert.process 'cp%d_3.txt', 'tafel_3.csv'
-  convert.process 'cp%d_4.txt', 'tafel_4.csv'
-  convert.process 'cp%d_5.txt', 'tafel_5.csv'
-  convert.process 'cp%d_6.txt', 'tafel_6.csv'
+  #convert.process 'cp%d_2.txt', 'tafel_2.csv'
+  #convert.process 'cp%d_3.txt', 'tafel_3.csv'
+  #convert.process 'cp%d_4.txt', 'tafel_4.csv'
+  #convert.process 'cp%d_5.txt', 'tafel_5.csv'
+  #convert.process 'cp%d_6.txt', 'tafel_6.csv'
 end
+
+exit
 
 
 # Create single plot
