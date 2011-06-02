@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require 'ruby-debug'
+require 'rsruby'
 
 require './tafel_extractor' #for cp_to_tafel
 
@@ -27,6 +28,10 @@ class TafelPlot
   attr_accessor :input, :output, :title, :color
 
   def initialize
+    @r = RSRuby.instance
+    @title = ''
+    @x_label = 'log(i / A/cm^2)'
+    @y_label = 'E / V (vs Ag/AgCl)'
   end
 
   def points
@@ -36,27 +41,23 @@ class TafelPlot
   end
 
   def draw
-    #Get input filename without extension
-    name = File.basename(@input, '.*')
+    @r.pdf(@output)
+    t = @r.read_csv(file = @input, header = false)
+    @r.plot(t['V1'], t['V2'], plot_arguments)
+    @r.dev_off.call #need .call or else we are just accessing the dev_off obj.
+  end
 
-    #Open up Rscript file for output
-    r = File.new('%s.R' % name, 'w')
-    r.puts '#!/usr/bin/env Rscript'
+  private
 
-    r.puts "pdf('%s')" % @output
-    r.puts "t <- read.csv(file='%s', header = FALSE)" % @input
-    r.puts <<-PLOT
-    plot(t$V1, t$V2, 
-         main="#{@title}", 
-         xlab="#{@x_title}", 
-         ylab="#{@y_title}")
-    PLOT
+  # Check for set class variables and then return a hash of arguments
+  def plot_arguments
+    args = {}
+    args[:main] = @title if not @title.empty?
+    #Always include x and y axes labels
+    args[:xlab] = @x_label
+    args[:ylab] = @y_label
 
-    r.close
-
-    #Execute the script
-    `Rscript #{name}`
-    #`open #{@output}`
+    return args
   end
 
 end
