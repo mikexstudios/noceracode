@@ -7,7 +7,7 @@ require './tafel_plot' #for tafel_plot
 # Example session for plotting
 
 $uncompensated_resistance = 21.7 #ohms
-$plot_title = '5 layer Mn in 1 M KBi, pH 9.22; L->H, 300s/pt (05/30/2011)'
+$plot_title = '5 layer Mn in 1 M KBi, pH 9.22; L-H, 300s/pt (05/30/2011)'
 $pass_colors = ['red', 'orange', 'cadetblue1', 'green', 'blue', 'purple', 'black']
 #$combined_ylim = [0.58, 1.03]
 
@@ -94,4 +94,47 @@ tafel_plot do |plot|
   plot.save
 
   `open tafel_combined.pdf`
+end
+
+require 'erb'
+require 'csv'
+require 'ruby-debug'
+class FitTable
+  attr_accessor :input, :output
+  attr_accessor :title
+
+  def initialize
+    @template = ERB.new(File.read('fit_template.erb'), 0, trim_mode = '>')
+    @title = nil
+  end
+
+  def make
+    #Open the CSV file, get data
+    csv = CSV.read(@input)
+
+    #The first row is the header
+    header = csv.shift
+    #The rest is the data
+    content = csv
+    title = @title
+    
+    output = File.new(@output, 'w')
+    output.puts @template.result(binding)
+    output.close
+  end
+end
+def fit_table
+  yield FitTable.new
+end
+
+fit_table do |table|
+  table.input = 'tafel_combined_fit.csv'
+  table.output = 'tafel_combined_fit.tex'
+  table.title = $plot_title
+  table.make
+
+  `pdflatex #{table.output}`
+  name = File.basename(table.output, '.*')
+  pdf = '%s.pdf' % name
+  `open #{pdf}`
 end
