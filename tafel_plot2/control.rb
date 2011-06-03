@@ -24,16 +24,18 @@ cp_to_tafel do |convert|
 end
 
 # Create single plot
-#tafel_plot do |plot|
-#  plot.input = 'tafel_1.csv'
-#  plot.output = 'tafel_1.pdf'
-#  plot.title = $plot_title
-#  #plot.points [3, 5], 6, [8-13]
-#  plot.draw
-#  plot.linear_fit #can optionally specify pt range
-#
-#  plot.save
-#end
+tafel_plot do |plot|
+  break
+  pass = 6
+  plot.input = 'tafel_%i.csv' % pass
+  plot.output = 'tafel_%i.pdf' % pass
+  plot.draw
+  #plot.linear_fit #can optionally specify pt range
+
+  plot.save
+
+  `open tafel_#{pass}.pdf`
+end
 
 
 # Create multiple plots
@@ -41,6 +43,7 @@ tafel_plot do |plot|
   plot.title = $plot_title
   plot.fit_match_color = true
   plot.output = 'tafel_combined.pdf'
+  plot.y_range = [0.89, 1.07] #V
 
   plot.input = 'tafel_1.csv'
   plot.color = $pass_colors.shift
@@ -52,27 +55,31 @@ tafel_plot do |plot|
   plot.input = 'tafel_2.csv'
   plot.color = $pass_colors.shift
   plot.draw
-  plot.linear_fit
+  plot.linear_fit 2..9
+  plot.linear_fit 9..13
 
   plot.input = 'tafel_3.csv'
   plot.color = $pass_colors.shift
   plot.draw
-  plot.linear_fit
+  plot.linear_fit 4..10
 
   plot.input = 'tafel_4.csv'
   plot.color = $pass_colors.shift
   plot.draw
-  plot.linear_fit
+  plot.linear_fit 3..9
+  plot.linear_fit 9..13
 
   plot.input = 'tafel_5.csv'
   plot.color = $pass_colors.shift
   plot.draw
-  plot.linear_fit
+  plot.linear_fit 2..9
+  plot.linear_fit 9..13
 
   plot.input = 'tafel_6.csv'
   plot.color = $pass_colors.shift
   plot.draw
-  plot.linear_fit
+  plot.linear_fit 1..9
+  plot.linear_fit 10..13
 
   plot.save
 

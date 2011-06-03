@@ -2,6 +2,7 @@ require 'rsruby'
 
 class TafelPlot
   attr_accessor :input, :output, :title, :color, :fit_match_color
+  attr_accessor :x_range, :y_range
 
   def initialize
     @r = RSRuby.instance
@@ -12,6 +13,10 @@ class TafelPlot
     @fit_color = 'red'
     #If set to true, the fit color will match the plot color.
     @fit_match_color = false
+    #If specified, will set the x and y axis range of the plot.
+    #NOTE: These are specified as arrays and not ruby ranges.
+    @x_range = nil
+    @y_range = nil
 
     #For multiple plots, we need to keep track if we already used the `plot`
     #command. If so, the subsequent plots are drawn with `points`.
@@ -127,6 +132,9 @@ class TafelPlot
       #Always include x and y axes labels
       args[:xlab] = @x_label
       args[:ylab] = @y_label
+    
+      args[:xlim] = @x_range if @x_range
+      args[:ylim] = @y_range if @y_range
     end
     args[:col] = @color
 
