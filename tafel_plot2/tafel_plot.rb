@@ -1,7 +1,7 @@
 require 'rsruby'
 
 class TafelPlot
-  attr_accessor :input, :output, :title, :color
+  attr_accessor :input, :output, :title, :color, :fit_match_color
 
   def initialize
     @r = RSRuby.instance
@@ -10,6 +10,8 @@ class TafelPlot
     @y_label = 'E / V (vs Ag/AgCl)'
     @color = 'black'
     @fit_color = 'red'
+    #If set to true, the fit color will match the plot color.
+    @fit_match_color = false
 
     #For multiple plots, we need to keep track if we already used the `plot`
     #command. If so, the subsequent plots are drawn with `points`.
@@ -38,7 +40,7 @@ class TafelPlot
     #Since color and other such parameters can be specified anywhere in R, we 
     #need to mirror that by attaching a hash at the end.
     @r.abline(coefficients[:intercept], coefficients[:slope], 
-              { :col => @fit_color })
+              { :col => @fit_match_color ? @color : @fit_color  })
 
     #Also print formatted output of coefficients and R^2 values
     summary = @r.eval_R('summary(fit)')
@@ -61,6 +63,7 @@ class TafelPlot
     coefficients = temp
 
     #Now out the values
+    puts 'For %s' % @input
     puts 'Slope:     %6.2f mV +/- %6.2f mV' % [coefficients[:slope][:estimate] * 1000, 
                                    coefficients[:slope][:std_error] * 1000]
     puts 'Intercept: %6.2f  V +/- %6.2f  V' % [coefficients[:intercept][:estimate],
@@ -70,7 +73,6 @@ class TafelPlot
   end
 
   def draw
-    @r.pdf(@output)
     t = @r.read_csv(file = @input, header = false)
     @x = t['V1'] #for convenience
     @y = t['V2']
@@ -86,6 +88,12 @@ class TafelPlot
 
   def save
     @r.dev_off.call #need .call or else we are just accessing the dev_off obj.
+  end
+
+  def output=(filename)
+    @output = filename
+    #Open up new file for plotting
+    @r.pdf(@output)
   end
 
   private
