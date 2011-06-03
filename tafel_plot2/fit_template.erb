@@ -1,0 +1,31 @@
+\documentclass{article}
+
+\usepackage{booktabs}
+\heavyrulewidth=0.15em
+
+\begin{document}
+
+\begin{table}
+\begin{center}
+
+\begin{tabular}{lrlllr}
+\toprule
+<% header.each do |val| %>
+\textbf{<%= val %>} <%= "&" unless val == header.last %>
+<% end %> \\
+
+\midrule
+<% content.each do |row| %>
+<% row.each do |val| %>
+<% if val == row.first %> \em{<%= val %>} <% else %> <%= val %> <% end %> <%= "&" unless val == row.last %>
+<% end %> \\
+<% end %>
+
+\bottomrule
+\end{tabular}
+
+\end{center}
+<% if title %>\caption{<%= title %>}<% end %>
+\end{table}
+
+\end{document}
