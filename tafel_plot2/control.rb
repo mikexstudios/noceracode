@@ -40,12 +40,15 @@ end
 
 # Create multiple plots
 tafel_plot do |plot|
+  pass = 0 #for legend title
+
   plot.title = $plot_title
   plot.fit_match_color = true
   plot.output = 'tafel_combined.pdf'
   plot.y_range = [0.89, 1.07] #V
 
   plot.input = 'tafel_1.csv'
+  plot.legend_title = 'Pass %i' % pass += 1
   plot.color = $pass_colors.shift
   plot.draw
   plot.linear_fit 1..6
@@ -53,34 +56,40 @@ tafel_plot do |plot|
   plot.linear_fit 9..13
 
   plot.input = 'tafel_2.csv'
+  plot.legend_title = 'Pass %i' % pass += 1
   plot.color = $pass_colors.shift
   plot.draw
   plot.linear_fit 2..9
   plot.linear_fit 9..13
 
   plot.input = 'tafel_3.csv'
+  plot.legend_title = 'Pass %i' % pass += 1
   plot.color = $pass_colors.shift
   plot.draw
   plot.linear_fit 4..10
 
   plot.input = 'tafel_4.csv'
+  plot.legend_title = 'Pass %i' % pass += 1
   plot.color = $pass_colors.shift
   plot.draw
   plot.linear_fit 3..9
   plot.linear_fit 9..13
 
   plot.input = 'tafel_5.csv'
+  plot.legend_title = 'Pass %i' % pass += 1
   plot.color = $pass_colors.shift
   plot.draw
   plot.linear_fit 2..9
   plot.linear_fit 9..13
 
   plot.input = 'tafel_6.csv'
+  plot.legend_title = 'Pass %i' % pass += 1
   plot.color = $pass_colors.shift
   plot.draw
   plot.linear_fit 1..9
   plot.linear_fit 10..13
 
+  plot.show_legend
   plot.save
 
   `open tafel_combined.pdf`

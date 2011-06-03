@@ -1,8 +1,18 @@
+require 'rubygems'
 require 'rsruby'
+require 'ruby-debug'
+
+#We require ruby 1.9 for ordered dictionaries
+required_version = Gem::Version.new('1.9')
+current = Gem::Version.new(RUBY_VERSION.dup)
+raise 'Requires at least ruby version 1.9!' if (current <=> required_version) < 0
 
 class TafelPlot
-  attr_accessor :input, :output, :title, :color, :fit_match_color
+  attr_accessor :input, :output
+  attr_accessor :title, :color, :fit_match_color
   attr_accessor :x_range, :y_range
+  attr_accessor :legend_title
+
 
   def initialize
     @r = RSRuby.instance
@@ -17,6 +27,12 @@ class TafelPlot
     #NOTE: These are specified as arrays and not ruby ranges.
     @x_range = nil
     @y_range = nil
+    @legend_title = ''
+
+    #Ordered hash of key (legend title) and value (legend color) in the
+    #order they appear in the drawn legend.
+    #NOTE: This requires ruby 1.9 or higher.
+    @legend_entries = {}
 
     #For multiple plots, we need to keep track if we already used the `plot`
     #command. If so, the subsequent plots are drawn with `points`.
@@ -108,8 +124,19 @@ class TafelPlot
       @r.points(@x, @y, plot_arguments)
     end
 
+    #Save legend title and color to the legend entries
+    @legend_entries[@legend_title] = @color
+
     puts '-----------------------------------------'
     puts
+  end
+
+  def show_legend(position = 'topleft')
+    @r.legend(position, {
+      :legend => @legend_entries.keys,
+      :col => @legend_entries.values,
+      :lty => 1
+    }) #line type
   end
 
   def save
