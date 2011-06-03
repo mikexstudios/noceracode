@@ -7,9 +7,9 @@ require './tafel_plot' #for tafel_plot
 # Example session for plotting
 
 $uncompensated_resistance = 21.7 #ohms
-$plot_title = '5 layer Mn in 0.5 M KPi, pH 2.49; H->L, 300s/pt - Pass #{pass} (04/02/2011)'
+$plot_title = '5 layer Mn in 1 M KBi, pH 9.22; L->H, 300s/pt (05/30/2011)'
 $pass_colors = ['red', 'orange', 'cadetblue1', 'green', 'blue', 'purple', 'black']
-$combined_ylim = [0.58, 1.03]
+#$combined_ylim = [0.58, 1.03]
 
 # Convert sets of CP files to tafel data
 cp_to_tafel do |convert|
