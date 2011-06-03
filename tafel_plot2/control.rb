@@ -3,6 +3,7 @@ require 'ruby-debug'
 
 require './tafel_extractor' #for cp_to_tafel
 require './tafel_plot' #for tafel_plot
+require './fit_table' #for fit_table
 
 # Example session for plotting
 
@@ -96,45 +97,15 @@ tafel_plot do |plot|
   `open tafel_combined.pdf`
 end
 
-require 'erb'
-require 'csv'
-require 'ruby-debug'
-class FitTable
-  attr_accessor :input, :output
-  attr_accessor :title
-
-  def initialize
-    @template = ERB.new(File.read('fit_template.erb'), 0, trim_mode = '>')
-    @title = nil
-  end
-
-  def make
-    #Open the CSV file, get data
-    csv = CSV.read(@input)
-
-    #The first row is the header
-    header = csv.shift
-    #The rest is the data
-    content = csv
-    title = @title
-    
-    output = File.new(@output, 'w')
-    output.puts @template.result(binding)
-    output.close
-  end
-end
-def fit_table
-  yield FitTable.new
-end
 
 fit_table do |table|
   table.input = 'tafel_combined_fit.csv'
-  table.output = 'tafel_combined_fit.tex'
+  name = File.basename(table.input, '.*')
+  table.output = '%s.tex' % name
   table.title = $plot_title
   table.make
 
   `pdflatex #{table.output}`
-  name = File.basename(table.output, '.*')
   pdf = '%s.pdf' % name
   `open #{pdf}`
 end
