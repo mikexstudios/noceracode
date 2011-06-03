@@ -46,6 +46,7 @@ tafel_plot do |plot|
   plot.fit_match_color = true
   plot.output = 'tafel_combined.pdf'
   plot.y_range = [0.89, 1.07] #V
+  plot.output_fit_csv = 'tafel_combined_fit.csv'
 
   plot.input = 'tafel_1.csv'
   plot.legend_title = 'Pass %i' % pass += 1

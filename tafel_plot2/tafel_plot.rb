@@ -13,7 +13,6 @@ class TafelPlot
   attr_accessor :x_range, :y_range
   attr_accessor :legend_title
 
-
   def initialize
     @r = RSRuby.instance
     @title = ''
@@ -33,6 +32,9 @@ class TafelPlot
     #order they appear in the drawn legend.
     #NOTE: This requires ruby 1.9 or higher.
     @legend_entries = {}
+
+    #If set to a file object, then will write CSV of line fit data to the file.
+    @output_fit_csv = nil
 
     #For multiple plots, we need to keep track if we already used the `plot`
     #command. If so, the subsequent plots are drawn with `points`.
@@ -109,6 +111,19 @@ class TafelPlot
                                    coefficients[:intercept][:std_error]]
     puts 'R^2:       %6.2f' % [r_squared * 100]
     puts
+
+    #Output CSV
+    if @output_fit_csv
+      #File, range, slope est., slope stdev, intercept, R^2
+      @output_fit_csv.puts '%s,%s,%.2f,%.2f,%.2f,%.2f' % [
+        @input,
+        range ? range : '',
+        coefficients[:slope][:estimate] * 1000, 
+        coefficients[:slope][:std_error] * 1000,
+        coefficients[:intercept][:estimate],
+        r_squared * 100
+      ]
+    end
   end
 
   def draw
@@ -141,12 +156,23 @@ class TafelPlot
 
   def save
     @r.dev_off.call #need .call or else we are just accessing the dev_off obj.
+
+    @output_fit_csv.close if @output_fit_csv
   end
 
   def output=(filename)
     @output = filename
     #Open up new file for plotting
     @r.pdf(@output)
+  end
+
+  def output_fit_csv=(filename)
+    #Create new file for writing csv data
+    @output_fit_csv = File.new(filename, 'w')
+
+    #Write initial column headers
+    #File, range, slope est., slope stdev, intercept, R^2
+    @output_fit_csv.puts 'File,Range,Slope (mV/dec),+/- (mV/dec),Intercept,R^2'
   end
 
   private
