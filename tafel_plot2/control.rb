@@ -1,9 +1,12 @@
 #!/usr/bin/env ruby
-require 'ruby-debug'
 
-require './tafel_extractor' #for cp_to_tafel
-require './tafel_plot' #for tafel_plot
-require './fit_table' #for fit_table
+# Since we run this file in the directory of the data files, we need to set
+# the path of the require files.
+$: << File.expand_path('~/Documents/Labs/noceracode/tafel_plot2')
+
+require 'tafel_extractor' #for cp_to_tafel
+require 'tafel_plot' #for tafel_plot
+require 'fit_table' #for fit_table
 
 # Example session for plotting
 
