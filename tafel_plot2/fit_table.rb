@@ -6,7 +6,8 @@ class FitTable
   attr_accessor :title
 
   def initialize
-    @template = ERB.new(File.read('fit_template.erb'), 0, trim_mode = '>')
+    template_path = File.join(File.dirname(__FILE__), "fit_template.erb")
+    @template = ERB.new(File.read(template_path), 0, trim_mode = '>')
     @title = nil
   end
 
