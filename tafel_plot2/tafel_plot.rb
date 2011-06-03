@@ -102,6 +102,9 @@ class TafelPlot
     else
       @r.points(@x, @y, plot_arguments)
     end
+
+    puts '-----------------------------------------'
+    puts
   end
 
   def save
