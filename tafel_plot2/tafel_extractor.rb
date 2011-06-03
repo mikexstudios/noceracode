@@ -84,3 +84,6 @@ end
 def cp_to_tafel
   yield TafelExtractor.new('cp')
 end
+def ait_to_tafel
+  yield TafelExtractor.new('ait')
+end
