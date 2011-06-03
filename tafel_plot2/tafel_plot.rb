@@ -115,8 +115,8 @@ class TafelPlot
     #Output CSV
     if @output_fit_csv
       #File, range, slope est., slope stdev, intercept, R^2
-      @output_fit_csv.puts '%s,%s,%.2f,%.2f,%.2f,%.2f' % [
-        @input,
+      @output_fit_csv.puts '%s, %s, %.2f, %.2f, %.2f, %.2f' % [
+        @legend_title,
         range ? range : '',
         coefficients[:slope][:estimate] * 1000, 
         coefficients[:slope][:std_error] * 1000,
@@ -172,7 +172,7 @@ class TafelPlot
 
     #Write initial column headers
     #File, range, slope est., slope stdev, intercept, R^2
-    @output_fit_csv.puts 'File,Range,Slope (mV/dec),+/- (mV/dec),Intercept,R^2'
+    @output_fit_csv.puts 'File, Range, Slope, +/-, Int., R$^2$'
   end
 
   private
