@@ -21,13 +21,27 @@ class TafelPlot
   def points
   end
 
-  def linear_fit
+  # Adds a linear fit to the plot and reports the linear parameters.
+  # If no range of points is specified, the fit will be over all points.
+  # NOTE: range should be specified using ruby range, ie. 3..5
+  # If draw is false, then line will not be plotted, but fitting parameters
+  # will be shown.
+  def linear_fit(range = nil, draw = true)
     raise "Need to call 'draw' first before fitting!" if not defined? @x
+
+    #If range is specified process it.
+    if range and range != 'all'
+      x = @x.slice(range)
+      y = @y.slice(range)
+    else
+      x = @x
+      y = @y
+    end
 
     #See: http://goo.gl/lAsEB for example using rsruby to fit line.
     #rsruby is not very advanced, so need to manually assign in the variables
-    @r.assign('x', @x)
-    @r.assign('y', @y)
+    @r.assign('x', x)
+    @r.assign('y', y)
 
     #fit = @r.lm('y ~ x') #linear model of y = m*x + b
     #We use the below instead of above to assign the output to fit and get the
@@ -39,8 +53,10 @@ class TafelPlot
 
     #Since color and other such parameters can be specified anywhere in R, we 
     #need to mirror that by attaching a hash at the end.
-    @r.abline(coefficients[:intercept], coefficients[:slope], 
-              { :col => @fit_match_color ? @color : @fit_color  })
+    if draw
+      @r.abline(coefficients[:intercept], coefficients[:slope], 
+                { :col => @fit_match_color ? @color : @fit_color  })
+    end
 
     #Also print formatted output of coefficients and R^2 values
     summary = @r.eval_R('summary(fit)')
@@ -63,7 +79,9 @@ class TafelPlot
     coefficients = temp
 
     #Now out the values
-    puts 'For %s' % @input
+    puts 'NOT DRAWN' if not draw
+    puts 'For file:  %s' % @input
+    puts 'For range: %s' % range if range
     puts 'Slope:     %6.2f mV +/- %6.2f mV' % [coefficients[:slope][:estimate] * 1000, 
                                    coefficients[:slope][:std_error] * 1000]
     puts 'Intercept: %6.2f  V +/- %6.2f  V' % [coefficients[:intercept][:estimate],

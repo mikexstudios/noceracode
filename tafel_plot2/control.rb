@@ -45,7 +45,9 @@ tafel_plot do |plot|
   plot.input = 'tafel_1.csv'
   plot.color = $pass_colors.shift
   plot.draw
-  plot.linear_fit
+  plot.linear_fit 1..6
+  plot.linear_fit 6..10, draw = false
+  plot.linear_fit 9..13
 
   plot.input = 'tafel_2.csv'
   plot.color = $pass_colors.shift
