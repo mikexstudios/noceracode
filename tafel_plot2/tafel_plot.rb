@@ -116,9 +116,11 @@ class TafelPlot
     #Output CSV
     if @output_fit_csv
       #File, range, slope est., slope stdev, intercept, R^2
-      @output_fit_csv.puts '%s, %s, %.2f, %.2f, %.2f, %.2f' % [
+      #NOTE: Can't have spaces between the comma fields, especially for the
+      #      quoted fields!
+      @output_fit_csv.puts '"%s","%s",%.2f,%.2f,%.2f,%.2f' % [
         @legend_title,
-        range ? range : '',
+        range ? range.to_s : '',
         coefficients[:slope][:estimate] * 1000, 
         coefficients[:slope][:std_error] * 1000,
         coefficients[:intercept][:estimate],
