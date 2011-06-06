@@ -54,8 +54,9 @@ class TafelPlot
 
     #If range is specified process it.
     if range and range != 'all'
-      x = @x.slice(range)
-      y = @y.slice(range)
+      p = get_points(range)
+      x = p.first
+      y = p.last
     else
       x = @x
       y = @y
@@ -104,7 +105,7 @@ class TafelPlot
     #Now out the values
     puts 'NOT DRAWN' if not draw
     puts 'For file:  %s' % @input
-    puts 'For range: %s' % range if range
+    puts 'For range: %s' % range.to_s if range
     puts 'Slope:     %6.2f mV +/- %6.2f mV' % [coefficients[:slope][:estimate] * 1000, 
                                    coefficients[:slope][:std_error] * 1000]
     puts 'Intercept: %6.2f  V +/- %6.2f  V' % [coefficients[:intercept][:estimate],
@@ -192,6 +193,31 @@ class TafelPlot
     args[:col] = @color
 
     return args
+  end
+
+  # Given a Range, an Array of Ranges, or 'all', returns the subset of points
+  # for that selection.
+  #
+  # Returns an Array of [x, y] points.
+  def get_points(selection = 'all')
+    case selection
+    when Range
+      return [@x.slice(selection), @y.slice(selection)]
+    when Array
+      combined = [[], []] #[x points, y points]
+      selection.each do |range|
+        p = get_points(range)
+        combined[0] += p.first #can't use combined.first to concat.
+        combined[1] += p.last
+      end
+      return combined
+    when Numeric
+      return [@x.slice(selection, 1), @y.slice(selection, 1)]
+    when String
+      return [@x, @y] if selection == 'all'
+    else
+      raise "Points selection is neither a Range, Array, or 'all'!"
+    end
   end
 
 end
