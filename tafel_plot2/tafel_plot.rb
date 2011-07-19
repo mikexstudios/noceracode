@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'rsruby'
-require 'ruby-debug'
+#require 'ruby-debug'
 
 #We require ruby 1.9 for ordered dictionaries
 required_version = Gem::Version.new('1.9')
