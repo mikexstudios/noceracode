@@ -4,6 +4,7 @@ require 'rsruby'
 
 class CPPlot
   attr_accessor :input, :output
+  attr_accessor :x_range, :y_range
 
   def initialize
     @r = RSRuby.instance
