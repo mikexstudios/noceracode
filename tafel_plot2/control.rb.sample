@@ -39,6 +39,15 @@ cp_plot do |plot|
   end
 end
 
+
+#Archive data files (since we don't need to use them anymore)
+data_file = 'data.zip'
+if not File.exists?(data_file)
+  `zip #{data_file} cp*.bin cp*.txt`
+  `rm cp*.bin cp*.txt` if File.exists?(data_file)
+end
+
+
 # Create single plot
 tafel_plot do |plot|
   break
