@@ -1,0 +1,95 @@
+#!/usr/bin/env ruby
+
+require './automate_chi.rb'
+
+def run_ait
+  puts '-------------------------------------'
+  begin
+    $log.info 'Running AIT experiment with filename: %s' % @save_filename
+    es = EchemSoftware.new
+    es.setup_amperometric_it_curve(@init_e, @sample_interval, @run_time, 
+                                   0, 3, @sensitivity) 
+    es.run(@status_check_interval, @status_max_runtime)
+    es.save_as(@save_filename)
+  rescue RuntimeError
+    $log.error 'RuntimeError: Retrying experiment...'
+    #Getting here means that the software has crashed. So let's try to restart
+    #it again.
+    es.kill
+    $log.info 'Killing program and sleeping for a bit...'
+    sleep(300) #5 minutes to let instrument rest
+    retry
+  ensure
+    if es #when we have errors, es is automatically GC'ed and set to nil.
+      $log.info 'Killing program through ensure...'
+      es.kill
+      es = nil
+    end
+  end
+  puts '-------------------------------------'
+  puts
+end
+
+#Experiment variables
+@run_time = 300 #sec
+#The sensitivity must be specified as 1e-n where n = [1, 12], because that
+#is what the potentiostat can handle.
+@sensitivity = 1e-3
+@sample_interval = 5 #sec
+
+#The following is for our own purposes for defining the potential range and step
+@potential_range = (0.9..1.2) #V
+@step = (@potential_range.last - @potential_range.first) / 12.0
+
+@status_check_interval = 60 #sec
+#When our runtime exceeds the maximum runtime given below, we assume the experi
+#has crashed and exit from loop.
+@status_max_runtime = @run_time + 120 #sec
+
+
+#We run from high potential to low potential
+save_prefix = 'ait'
+for pass in 1..4
+  #@run_time = 300
+  
+  potentials = @potential_range.step(@step).to_a.map {|x| x.round(3)}
+  potentials.reverse! #for from high to low
+  $log.info('Potentials: %s' % potentials)
+  
+  potentials.each_with_index do |p, i|
+    @init_e = p
+    @save_filename  = '%s%02i_%i.bin' % [save_prefix, i+1, pass]
+    run_ait
+  end
+end
+
+#This is low potential to high potential
+save_prefix = 'bait'
+for pass in 1..4
+  #@run_time = 300
+  
+  potentials = @potential_range.step(@step).to_a.map {|x| x.round(3)}
+  $log.info('Potentials: %s' % potentials)
+  
+  potentials.each_with_index do |p, i|
+    @init_e = p
+    @save_filename  = '%s%02i_%i.bin' % [save_prefix, i+1, pass]
+    run_ait
+  end
+end
+
+#This is mixed with H->L first.
+save_prefix = 'cait'
+for pass in 1..4
+  #@run_time = 300
+  
+  potentials = @potential_range.step(@step).to_a.map {|x| x.round(3)}
+  potentials.reverse! if pass.odd? #odd passes are H->L
+  $log.info('Potentials: %s' % potentials)
+
+  potentials.each_with_index do |p, i|
+    @init_e = p
+    @save_filename  = '%s%02i_%i.bin' % [save_prefix, i+1, pass]
+    run_ait
+  end
+end
