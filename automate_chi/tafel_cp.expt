@@ -1,5 +1,13 @@
 #!/usr/bin/env ruby
 
+require 'logger' #Must be required before automate_chi.rb!
+#$log_file = File.new('Z:\Labs\noceracode\automate_chi\test.log', 'w')
+$log_file = File.new('C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\07-26-2011\tafel5\tafel_cp.log', 'w')
+$log_file.sync = true #do not buffer
+$log = Logger.new($log_file)
+#$log = Logger.new(STDOUT)
+$log.level = Logger::DEBUG
+
 require './automate_chi.rb'
 
 def run_cp
