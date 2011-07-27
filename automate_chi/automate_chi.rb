@@ -2,7 +2,8 @@ require 'au3' # make sure the AutoItX3.dll is in the same directory
 #require 'ruby-debug'
 #include AutoItX3 # useful if you don't want to always use AutoItX3:: before everything
 require 'logger'
-$log = Logger.new('C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\07-26-2011\tafel5\tafel_cp.log')
+#$log = Logger.new('C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\07-26-2011\tafel5\tafel_cp.log')
+$log = Logger.new(STDOUT)
 $log.level = Logger::DEBUG
 
 #TO THINK: Is there an easy way to set the path of saved files? The current path is
@@ -148,6 +149,20 @@ class EchemSoftware
     # and subtract one.
     down_arrows = (Math.log10(sensitivity).to_i * -1) - 1
     (1..down_arrows).each { |i| AutoItX3.send_keys('{DOWN}') }
+    AutoItX3.send_keys('{ENTER}') #OK button
+  end
+
+  def setup_manual_ir_compensation(resistance)
+    $log.debug 'Setting manual iR compensation...'
+
+    @main_window.activate #sets focus to window
+    AutoItX3.send_keys('!ci') #open up the control -> iR Compensation window
+    AutoItX3::Window.wait('iR Compensation')
+    AutoItX3.send_keys('!w') #Always enable iR Comp
+    AutoItX3.send_keys('!M') #Set iR Comp Mode to Manual
+    AutoItX3.send_keys('!i') #Check iR Compensation for Next Run box
+    AutoItX3.send_keys('!R') #Resistance (ohm) under Manual Comp
+    AutoItX3.send_keys(resistance.to_s)
     AutoItX3.send_keys('{ENTER}') #OK button
   end
 
