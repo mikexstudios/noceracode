@@ -1,0 +1,99 @@
+#!/usr/bin/env ruby
+
+require './automate_chi.rb'
+
+def run_cp
+  $log.info '-------------------------------------'
+  begin
+    $log.info 'Running CP experiment with filename: %s' % @save_filename
+    es = EchemSoftware.new
+    es.setup_chronopotentiometry(0, @anodic_current, @potential_range.last, 
+                                 @potential_range.first, 1, @anodic_time, 
+                                 'a', 1)
+    es.run(@status_check_interval, @status_max_runtime)
+    es.save_as(@save_filename)
+  rescue RuntimeError
+    $log.error 'RuntimeError: Retrying experiment...'
+    #Getting here means that the software has crashed. So let's try to restart
+    #it again.
+    es.kill
+    $log.info 'Killing program and sleeping for a bit...'
+    sleep(300) #5 minutes to let instrument rest
+    retry
+  ensure
+    if es #when we have errors, es is automatically GC'ed and set to nil.
+      $log.info 'Killing program through ensure...'
+      es.kill
+      es = nil
+    end
+  end
+  $log.info '-------------------------------------'
+  $log.info
+end
+
+#Experiment variables
+#@anodic_current = 1e-3 #A
+@anodic_time = 300 #sec
+@potential_range = [0, 3] #low, high V
+
+@status_check_interval = 60 #sec
+#When our runtime exceeds the maximum runtime given below, we assume the experi
+#has crashed and exit from loop.
+@status_max_runtime = @anodic_time + 120 #sec
+
+#These are L->H points
+save_prefix = 'cp'
+for pass in 1..4
+  @anodic_time    = 300
+  
+  currents = [3.16e-08, 5.62e-08, 1.00e-07, 1.78e-07, 3.16e-07, 5.62e-07, 1.00e-06, 1.78e-06, 3.16e-06, 5.62e-06, 
+               1.00e-05, 1.78e-05, 3.16e-05, 5.62e-05]
+  
+  currents.each_with_index do |c, i|
+    @anodic_current = c
+    @save_filename  = '%s%02i_%i.bin' % [save_prefix, i+1, pass]
+    run_cp	
+  end
+end
+
+save_prefix = 'bcp'
+for pass in 1..4
+  @anodic_time    = 300
+  
+  currents = [3.16e-08, 5.62e-08, 1.00e-07, 1.78e-07, 3.16e-07, 5.62e-07, 1.00e-06, 1.78e-06, 3.16e-06, 5.62e-06, 
+               1.00e-05, 1.78e-05, 3.16e-05, 5.62e-05]
+  currents.reverse! #go from high current to low current
+  
+  currents.each_with_index do |c, i|
+    @anodic_current = c
+    @save_filename  = '%s%02i_%i.bin' % [save_prefix, i+1, pass]
+    run_cp	
+  end
+  
+end
+
+save_prefix = 'ccp'
+for pass in 1..4
+  if pass.odd? #odd passes are H->L
+    @anodic_time    = 300
+    currents = [3.16e-08, 5.62e-08, 1.00e-07, 1.78e-07, 3.16e-07, 5.62e-07, 1.00e-06, 1.78e-06, 3.16e-06, 5.62e-06, 
+                 1.00e-05, 1.78e-05, 3.16e-05, 5.62e-05]
+    currents.reverse! #go from high current to low current
+  
+    currents.each_with_index do |c, i|
+      @anodic_current = c
+      @save_filename  = '%s%02i_%i.bin' % [save_prefix, i+1, pass]
+      run_cp	
+    end
+  else #even is L->H
+    @anodic_time    = 300
+    currents = [3.16e-08, 5.62e-08, 1.00e-07, 1.78e-07, 3.16e-07, 5.62e-07, 1.00e-06, 1.78e-06, 3.16e-06, 5.62e-06, 
+                 1.00e-05, 1.78e-05, 3.16e-05, 5.62e-05]
+  
+    currents.each_with_index do |c, i|
+      @anodic_current = c
+      @save_filename  = '%s%02i_%i.bin' % [save_prefix, i+1, pass]
+      run_cp	
+    end
+  end
+end
