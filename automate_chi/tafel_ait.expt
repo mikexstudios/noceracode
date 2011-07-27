@@ -1,5 +1,13 @@
 #!/usr/bin/env ruby
 
+require 'logger' #Must be required before automate_chi.rb!
+#$log_file = File.new('Z:\Labs\noceracode\automate_chi\test.log', 'w')
+$log_file = File.new('C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\07-26-2011\tafel5\tafel_cp.log', 'w')
+$log_file.sync = true #do not buffer
+$log = Logger.new($log_file)
+#$log = Logger.new(STDOUT)
+$log.level = Logger::DEBUG
+
 require './automate_chi.rb'
 
 def run_ait
@@ -7,6 +15,7 @@ def run_ait
   begin
     $log.info 'Running AIT experiment with filename: %s' % @save_filename
     es = EchemSoftware.new
+    es.setup_manual_ir_compensation(@ir_comp)
     es.setup_amperometric_it_curve(@init_e, @sample_interval, @run_time, 
                                    0, 3, @sensitivity) 
     es.run(@status_check_interval, @status_max_runtime)
@@ -36,6 +45,7 @@ end
 #is what the potentiostat can handle.
 @sensitivity = 1e-3
 @sample_interval = 5 #sec
+@ir_comp = 16 #ohm
 
 #The following is for our own purposes for defining the potential range and step
 @potential_range = (0.9..1.2) #V
@@ -54,7 +64,7 @@ for pass in 1..4
   
   potentials = @potential_range.step(@step).to_a.map {|x| x.round(3)}
   potentials.reverse! #for from high to low
-  $log.info('Potentials: %s' % potentials)
+  $log.info('Potentials: %s' % potentials.to_s)
   
   potentials.each_with_index do |p, i|
     @init_e = p
@@ -69,7 +79,7 @@ for pass in 1..4
   #@run_time = 300
   
   potentials = @potential_range.step(@step).to_a.map {|x| x.round(3)}
-  $log.info('Potentials: %s' % potentials)
+  $log.info('Potentials: %s' % potentials.to_s)
   
   potentials.each_with_index do |p, i|
     @init_e = p
@@ -85,7 +95,7 @@ for pass in 1..4
   
   potentials = @potential_range.step(@step).to_a.map {|x| x.round(3)}
   potentials.reverse! if pass.odd? #odd passes are H->L
-  $log.info('Potentials: %s' % potentials)
+  $log.info('Potentials: %s' % potentials.to_s)
 
   potentials.each_with_index do |p, i|
     @init_e = p

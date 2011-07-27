@@ -1,10 +1,7 @@
 require 'au3' # make sure the AutoItX3.dll is in the same directory
 #require 'ruby-debug'
 #include AutoItX3 # useful if you don't want to always use AutoItX3:: before everything
-require 'logger'
-#$log = Logger.new('C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\07-26-2011\tafel5\tafel_cp.log')
-$log = Logger.new(STDOUT)
-$log.level = Logger::DEBUG
+raise RuntimeError, '$log (Logger) was not defined in the expt file!' if $log.nil?
 
 #TO THINK: Is there an easy way to set the path of saved files? The current path is
 #being set in the cfg file, but the format looks ugly to touch. Need to figure out
