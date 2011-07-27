@@ -43,18 +43,11 @@ end
 
 #These are L->H points
 save_prefix = 'cp'
-for pass in 2..6
-  if pass == 1
-    #@anodic_time    = 10800
-    @anodic_time    = 300
-  else
-    @anodic_time    = 300
-  end
+for pass in 1..4
+  @anodic_time    = 300
   @anodic_current = 1.00e-06
   @save_filename  = '%s01_%i.bin' % [save_prefix, pass]
   run_cp
-
-  @anodic_time    = 300
 
   @anodic_current = 1.78e-06
   @save_filename  = '%s02_%i.bin' % [save_prefix, pass]
@@ -106,7 +99,7 @@ for pass in 2..6
 end
 
 save_prefix = 'bcp'
-for pass in 1..6
+for pass in 1..4
   @anodic_time    = 300
 
   @anodic_current = 1.00e-03
@@ -163,7 +156,7 @@ for pass in 1..6
 end
 
 save_prefix = 'ccp'
-for pass in 1..6
+for pass in 1..4
   if pass.odd? #odd passes are H->L
     @anodic_time    = 300
 
