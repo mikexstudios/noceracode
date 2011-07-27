@@ -83,6 +83,7 @@ class EchemSoftware
     @main_window.activate #sets focus to window
     AutoItX3.send_keys('!st') #open up the system -> techniques window
     AutoItX3::Window.wait('Electrochemical Techniques')
+
     #Single left click the chronopotentiometry item (at relative coordinates 55, 321)
     techniques = AutoItX3::Control.new('Electrochemical Techniques', '', 1000)
     techniques.click('left', 1, 55, 334)
@@ -108,6 +109,45 @@ class EchemSoftware
     AutoItX3.send_keys('!D') #Data Storage Interval (sec)
     AutoItX3.send_keys(data_storage_interval.to_s)
     AutoItX3.send_keys('!e') #Set Current Switching Priority to Time
+    AutoItX3.send_keys('{ENTER}') #OK button
+  end
+
+  def setup_amperometric_it_curve(init_e, sample_interval, run_time, quiet_time,
+                                  scales_during_run, sensitivity)
+    $log.debug 'Setting up amperometric i-t curve experiment...'
+
+    @main_window.activate #sets focus to window
+    AutoItX3.send_keys('!st') #open up the system -> techniques window
+    AutoItX3::Window.wait('Electrochemical Techniques')
+
+    #Single left click the chronopotentiometry item (at relative coordinates 55, 321)
+    techniques = AutoItX3::Control.new('Electrochemical Techniques', '', 1000)
+    techniques.click('left', 1, 55, 177)
+    techniques.send_keys('{ENTER}') #OK button
+    
+    AutoItX3::Window.wait('Amperometric i-t Curve Parameters')
+    parameters = AutoItX3::Window.new('Amperometric i-t Curve Parameters')
+    # the nice thing is that each field in the dialog box is ALT accessible
+    AutoItX3.send_keys('!I') #Init E (V)
+    AutoItX3.send_keys(init_e.to_s)
+    AutoItX3.send_keys('!a') #Sample Interval (sec)
+    AutoItX3.send_keys(sample_interval.to_s)
+    AutoItX3.send_keys('!T') #Run Time (sec)
+    AutoItX3.send_keys(run_time.to_s)
+    AutoItX3.send_keys('!Q') #Quiet Time (sec)
+    AutoItX3.send_keys(quiet_time.to_s)
+    AutoItX3.send_keys('!d') #Scales during Run
+    AutoItX3.send_keys(scales_during_run.to_s)
+    AutoItX3.send_keys('!S') #Sensitivity (A/V)
+    # Since we can't enter in the value directly, we first need to normalize the
+    # position. We normalize to 1.e-001 by pressing up 12 times.
+    (1..12).each { |i| AutoItX3.send_keys('{UP}') }
+    # We note that if user selects 1.e-001, then we don't press any down arrow.
+    # For 1.e-002, we press down once. For 1.e-012, we press down 11 times. Thus,
+    # we pull out the power part using log10. Then convert to a positive integer
+    # and subtract one.
+    down_arrows = (Math.log10(sensitivity).to_i * -1) - 1
+    (1..down_arrows).each { |i| AutoItX3.send_keys('{DOWN}') }
     AutoItX3.send_keys('{ENTER}') #OK button
   end
 
