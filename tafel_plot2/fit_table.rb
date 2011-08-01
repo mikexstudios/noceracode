@@ -20,6 +20,9 @@ class FitTable
     #The rest is the data
     content = csv
     title = @title
+
+    #Escape the title for any LaTeX sensitive characters
+    title.gsub!('%', '\%')
     
     output = File.new(@output, 'w')
     output.puts @template.result(binding)
