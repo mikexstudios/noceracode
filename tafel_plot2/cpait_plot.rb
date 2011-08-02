@@ -2,7 +2,7 @@ require 'rubygems'
 require 'rsruby'
 #require 'ruby-debug'
 
-class CPPlot
+class CPAITPlot
   attr_accessor :input, :output
   attr_accessor :x_range, :y_range
 
@@ -73,5 +73,8 @@ class CPPlot
 
 end
 def cp_plot
-  yield CPPlot.new
+  yield CPAITPlot.new
+end
+def ait_plot
+  yield CPAITPlot.new
 end
