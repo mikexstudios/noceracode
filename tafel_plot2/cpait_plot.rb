@@ -5,6 +5,7 @@ require 'rsruby'
 class CPAITPlot
   attr_accessor :input, :output
   attr_accessor :x_range, :y_range
+  attr_accessor :x_label, :y_label
 
   def initialize
     @r = RSRuby.instance
