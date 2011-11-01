@@ -1,0 +1,158 @@
+#!/usr/bin/env ruby
+
+$: << File.expand_path('~/Documents/Labs/noceracode/tafel_plot2')
+require 'tafel_extractor'
+require 'tafel_plot'
+require 'cpait_plot'
+require 'fit_table'
+
+# Example session for plotting
+
+$file_prefix = 'ait' #typically: cp, bcp, or ccp
+$uncompensated_resistance = 0.0 #ohms
+$plot_title = 'Blank FTO, 1M KPi, pH 7.27; H-L, 300s/pt (10/26/2011)'
+$pass_colors = ['red', 'orange', 'cadetblue1', 'green', 'blue', 'purple', 'black']
+#$y_range = [0.844, 1.02] #V
+$x_range = [-6.0, -3.9] #log(i)
+
+# Convert sets of AIT files to tafel data
+if not File.size?('tafel_1.csv') or #nil if file DNE or zero size
+   ARGV.include?('-p1') #force regeneration of tafel files
+  puts 'tafel_N.csv files do not exist, converting base data files...'
+  ait_to_tafel do |convert|
+    #break #skip this step
+    convert.uncompensated_resistance = $uncompensated_resistance
+    convert.process "#{$file_prefix}*_1.txt", 'tafel_1.csv'
+    convert.process "#{$file_prefix}*_2.txt", 'tafel_2.csv'
+    convert.process "#{$file_prefix}*_3.txt", 'tafel_3.csv'
+    convert.process "#{$file_prefix}*_4.txt", 'tafel_4.csv'
+    #convert.process "#{$file_prefix}*_5.txt", 'tafel_5.csv'
+  end
+  #Check to see if generated tafels have non-zero length
+  puts `ls -al tafel_*.csv`
+  if not File.size?('tafel_1.csv')
+    puts 'WARNING: Empty tafel files!' 
+    exit
+  end
+end
+
+
+#Create a multi-plot of AIT runs
+if ARGV.include?('-p2') and not File.exists?('multicp_1.pdf') #pass 2
+  puts 'Generating multi-plots...'
+  ait_plot do |plot|
+    plot.y_label = 'i / A'
+    #Set a range to have all of the plots normalized to each other
+    #plot.y_range = [10.0**$x_range.first, 10.0**$x_range.last]
+    #plot.y_range = [10.0**-8, 10.0**-4]
+    #print plot.y_range
+    (1..4).each do |pass|
+      plot.input = "#{$file_prefix}*_#{pass}.txt"
+      plot.output = "multicp_#{pass}.pdf"
+      plot.rows_cols = [4, 4] #This needs to be after .output definition
+      plot.draw
+      plot.save
+      `open #{plot.output}`
+    end
+  end
+end
+
+if ARGV.include?('-p3') #pass 3
+  #Archive data files (since we don't need to use them anymore)
+  data_file = 'data.zip'
+  if not File.exists?(data_file)
+    puts 'Archiving individual data files into combined .zip...'
+    `zip #{data_file} #{$file_prefix}*.bin #{$file_prefix}*.txt`
+    `rm #{$file_prefix}*.bin #{$file_prefix}*.txt` if File.exists?(data_file)
+  end
+end
+
+
+# Create single plot
+tafel_plot do |plot|
+  break
+  pass = 6
+  plot.input = 'tafel_%i.csv' % pass
+  plot.output = 'tafel_%i.pdf' % pass
+  plot.draw
+  #plot.linear_fit #can optionally specify pt range
+
+  plot.save
+
+  `open tafel_#{pass}.pdf`
+end
+
+
+# Create multiple plots
+tafel_plot do |plot|
+  pass = 0 #for legend title
+
+  plot.title = $plot_title
+  plot.fit_match_color = true
+  plot.output = 'tafel_combined.pdf'
+  plot.y_range = $y_range
+  plot.x_range = $x_range if not $x_range.nil?
+  plot.output_fit_csv = 'tafel_combined_fit.csv'
+
+  plot.input = 'tafel_1.csv'
+  plot.legend_title = 'Pass %i' % pass += 1
+  plot.color = $pass_colors.shift
+  plot.draw
+  plot.linear_fit 0..5
+  plot.linear_fit 8..10
+
+  plot.input = 'tafel_2.csv'
+  plot.legend_title = 'Pass %i' % pass += 1
+  plot.color = $pass_colors.shift
+  plot.draw
+  plot.linear_fit 0..5
+  plot.linear_fit 8..10
+
+  plot.input = 'tafel_3.csv'
+  plot.legend_title = 'Pass %i' % pass += 1
+  plot.color = $pass_colors.shift
+  plot.draw
+  plot.linear_fit 0..5
+  plot.linear_fit 8..10
+
+  plot.input = 'tafel_4.csv'
+  plot.legend_title = 'Pass %i' % pass += 1
+  plot.color = $pass_colors.shift
+  plot.draw
+  plot.linear_fit 0..5
+  plot.linear_fit 8..10
+
+  #plot.input = 'tafel_5.csv'
+  #plot.legend_title = 'Pass %i' % pass += 1
+  #plot.color = $pass_colors.shift
+  #plot.draw
+  #plot.linear_fit 0..2
+  #plot.linear_fit 4..8
+
+  #plot.input = 'tafel_6.csv'
+  #plot.legend_title = 'Pass %i' % pass += 1
+  #plot.color = $pass_colors.shift
+  #plot.draw
+  #plot.linear_fit 0..2
+  #plot.linear_fit 5..12
+
+  plot.show_legend
+  plot.save
+
+  `open tafel_combined.pdf`
+end
+
+if ARGV.include?('-p2') #pass 2
+  puts 'Creating LaTeX table for plot...'
+  fit_table do |table|
+    table.input = 'tafel_combined_fit.csv'
+    name = File.basename(table.input, '.*')
+    table.output = '%s.tex' % name
+    table.title = $plot_title
+    table.make
+  
+    `pdflatex #{table.output}`
+    pdf = '%s.pdf' % name
+    `open #{pdf}`
+  end
+end
