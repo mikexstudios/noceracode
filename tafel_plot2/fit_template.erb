@@ -3,6 +3,8 @@
 \usepackage{booktabs}
 \heavyrulewidth=0.15em
 
+\usepackage{caption}
+
 \begin{document}
 
 \begin{table}
@@ -25,7 +27,7 @@
 \end{tabular}
 
 \end{center}
-<% if title %>\caption{<%= title %>}<% end %>
+<% if title %>\caption*{<%= title %>}<% end %>
 \end{table}
 
 \end{document}
