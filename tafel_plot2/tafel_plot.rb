@@ -9,7 +9,7 @@ raise 'Requires at least ruby version 1.9!' if (current <=> required_version) < 
 
 class TafelPlot
   attr_accessor :input, :output
-  attr_accessor :title, :color, :fit_match_color
+  attr_accessor :title, :color, :fit_match_color, :symbol
   attr_accessor :x_range, :y_range
   attr_accessor :legend_title
 
@@ -19,6 +19,7 @@ class TafelPlot
     @x_label = 'log(i / A/cm^2)'
     @y_label = 'E / V (vs Ag/AgCl)'
     @color = 'black'
+    @symbol = 1 #see http://sphaerula.com/legacy/R/plotSymbols.html 
     @fit_color = 'red'
     #If set to true, the fit color will match the plot color.
     @fit_match_color = false
@@ -193,6 +194,7 @@ class TafelPlot
       args[:ylim] = @y_range if @y_range
     end
     args[:col] = @color
+    args[:pch] = @symbol
 
     return args
   end
