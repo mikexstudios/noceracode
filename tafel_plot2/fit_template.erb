@@ -19,7 +19,7 @@
 \midrule
 <% content.each do |row| %>
 <% row.each do |val| %>
-<% if val == row.first %> \em{<%= val %>} <% else %> <%= val %> <% end %> <%= "&" unless val == row.last %>
+<% if val == row.first %> \em{<%= val.gsub!('_', '\_') %>} <% else %> <%= val %> <% end %> <%= "&" unless val == row.last %>
 <% end %> \\
 <% end %>
 
