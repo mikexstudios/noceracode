@@ -73,6 +73,59 @@ class EchemSoftware
     AutoItX3.block_input = false
   end
 
+  def setup_cyclic_voltammetry(init_e = 0.0, high_e = 0.0, low_e = 0.0, final_e = 0.0,
+                               initial_scan_polarity = 'negative', scan_rate = 0.1,
+                               sweep_segments = 2, sample_interval = 0.001, 
+                               sensitivity = 1.0e-6)
+    $log.debug 'Setting up cyclic voltammetry experiment...'
+
+    @main_window.activate #sets focus to window
+    #NOTE: We don't  need to open up the techniques window because upon clean
+    #start, the default technique should be CV.
+    AutoItX3.send_keys('!sp') #open up the system -> parameters
+    
+    AutoItX3::Window.wait('Cyclic Voltammetry Parameters')
+    parameters = AutoItX3::Window.new('Cyclic Voltammetry Parameters')
+    AutoItX3.send_keys('!I') #Init E (V)
+    AutoItX3.send_keys(init_e.to_s)
+    AutoItX3.send_keys('!H') #High E (V)
+    AutoItX3.send_keys(high_e.to_s)
+    AutoItX3.send_keys('!L') #Low E (V)
+    AutoItX3.send_keys(low_e.to_s)
+    #NOTE: On some systems, the final e may be greyed out. Thus, we need to 
+    #enable Final E first through the convoluted process of checking Auto Sens,
+    #tabbing to 'Enable Final E', then disabling Auto Sens.
+    AutoItX3.send_keys('!A{TAB}{SPACE}!A') #Enable Final E
+    AutoItX3.send_keys('!L{TAB}') #Final E (V)
+    AutoItX3.send_keys(final_e.to_s)
+
+    AutoItX3.send_keys('!P') #Initial Scan Polarity
+    # Since we can't enter in the value directly, we first need to normalize the
+    # position. We normalize to the "Negative" value by pressing up a few times.
+    3.times { AutoItX3.send_keys('{UP}') }
+    if initial_scan_polarity == 'positive' then AutoItX3.send_keys('{DOWN}') end
+
+    AutoItX3.send_keys('!R') #Scan Rate (V/s)
+    AutoItX3.send_keys(scan_rate.to_s)
+    AutoItX3.send_keys('!w') #Sweep Segments
+    AutoItX3.send_keys(scan_rate.to_s)
+    AutoItX3.send_keys('!m') #Sample Interval (V)
+    AutoItX3.send_keys(sample_interval.to_s)
+
+    AutoItX3.send_keys('!S') #Sensitivity (A/V)
+    # Since we can't enter in the value directly, we first need to normalize the
+    # position. We normalize to 1.e-001 by pressing up 12 times.
+    12.times { AutoItX3.send_keys('{UP}') }
+    # We note that if user selects 1.e-001, then we don't press any down arrow.
+    # For 1.e-002, we press down once. For 1.e-012, we press down 11 times. Thus,
+    # we pull out the power part using log10. Then convert to a positive integer
+    # and subtract one.
+    down_arrows = (Math.log10(sensitivity).to_i * -1) - 1
+    down_arrows.times { AutoItX3.send_keys('{DOWN}') }
+
+    AutoItX3.send_keys('{ENTER}') #OK button
+
+
   def setup_chronopotentiometry(cathodic_current, anodic_current, high_e, low_e,
                                 cathodic_time, anodic_time, initial_polarity, 
                                 data_storage_interval)
