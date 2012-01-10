@@ -149,15 +149,18 @@ class EchemSoftware
     AutoItX3.send_keys('{ENTER}') #OK button
   end
 
-  def get_open_circuit_potential(resistance)
+  def get_open_circuit_potential
     $log.debug 'Getting open circuit potential...'
     @main_window.activate #sets focus to window
 
     AutoItX3.send_keys('!co') #open up the control -> Open Circuit Potential window
     AutoItX3::Window.wait('Open Circuit Potential Measurement')
 
-    ocp = AutoItX3::Control.new('Open Circuit Potential Measurement', '', 'Edit1')
-    return ocp.text
+    ocp_control = AutoItX3::Control.new('Open Circuit Potential Measurement', '', 'Edit1')
+    ocp = ocp_control.text.to_f
+
+    AutoItX3.send_keys('{ENTER}') #OK button
+    return ocp.text.to_f
   end
 
   def setup_manual_ir_compensation(resistance)
