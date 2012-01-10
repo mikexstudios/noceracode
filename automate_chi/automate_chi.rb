@@ -198,12 +198,7 @@ class EchemSoftware
       comp_level_control = AutoItX3::Control.new('iR Compensation', '', 'Edit3')
       uncomp_r_control = AutoItX3::Control.new('iR Compensation', '', 'Edit4')
 
-      resistance = resistance_control.text.to_f
-      rc_constant = rc_constant_control.text.to_f
-      comp_level = comp_level_control.text.to_f
-      uncomp_r = uncomp_r_control.text.to_f
-
-      if resistance.strip.empty? and rc_constant.strip.empty?
+      if resistance_control.text.strip.empty? and rc_constant_control.text.strip.empty?
         $log.error 'iR Comp Test Results are empty!'
         raise RuntimeError, 'iR Comp Test Results are empty!'
       end
@@ -216,6 +211,11 @@ class EchemSoftware
       $log.error 'iR Comp Test Results are empty despite retries!'
       raise RuntimeError, 'iR Comp Test Results are empty despite retries!'
     end
+
+    resistance = resistance_control.text.to_f
+    rc_constant = rc_constant_control.text.to_f
+    comp_level = comp_level_control.text.to_f
+    uncomp_r = uncomp_r_control.text.to_f
 
     AutoItX3.send_keys('{ENTER}') #OK button to exit box
 
