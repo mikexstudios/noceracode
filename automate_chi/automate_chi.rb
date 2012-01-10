@@ -108,7 +108,7 @@ class EchemSoftware
     AutoItX3.send_keys('!R') #Scan Rate (V/s)
     AutoItX3.send_keys(scan_rate.to_s)
     AutoItX3.send_keys('!w') #Sweep Segments
-    AutoItX3.send_keys(scan_rate.to_s)
+    AutoItX3.send_keys(sweep_segments.to_s)
     AutoItX3.send_keys('!m') #Sample Interval (V)
     AutoItX3.send_keys(sample_interval.to_s)
 
@@ -124,7 +124,7 @@ class EchemSoftware
     down_arrows.times { AutoItX3.send_keys('{DOWN}') }
 
     AutoItX3.send_keys('{ENTER}') #OK button
-
+  end
 
   def setup_chronopotentiometry(cathodic_current, anodic_current, high_e, low_e,
                                 cathodic_time, anodic_time, initial_polarity, 
