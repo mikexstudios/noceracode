@@ -184,11 +184,28 @@ class EchemSoftware
     AutoItX3.send_keys('!v') #Overshoot (%)
     AutoItX3.send_keys(overshoot.to_s)
 
-    #AutoItX3.send_keys('!T') #Test button
-
+    AutoItX3.send_keys('!T') #Test button
     #Now we have to wait until values appear in the iR Comp Test Results area.
+    sleep('15') #sec
+    #TODO: Have a retry loop checking for the iR comp values to appear
+  
+    #Now extract the values
+    resistance_control = AutoItX3::Control.new('iR Compensation', '', 'Edit1')
+    rc_constant_control = AutoItX3::Control.new('iR Compensation', '', 'Edit2')
+    comp_level_control = AutoItX3::Control.new('iR Compensation', '', 'Edit3')
+    uncomp_r_control = AutoItX3::Control.new('iR Compensation', '', 'Edit4')
 
-    #AutoItX3.send_keys('{ENTER}') #OK button
+    resistance = resistance_control.text.to_f
+    rc_constant = rc_constant_control.text.to_f
+    comp_level = comp_level_control.text.to_f
+    uncomp_r = uncomp_r_control.text.to_f
+
+    AutoItX3.send_keys('{ENTER}') #OK button to exit box
+
+    return {'resistance' => resistance, 
+            'rc_constant' => rc_constant,
+            'comp_level' => comp_level,
+            'uncomp_r' => uncomp_r}
   end
 
   def setup_manual_ir_compensation(resistance)
