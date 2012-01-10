@@ -189,7 +189,7 @@ class EchemSoftware
     tries = 0
     begin
       #Now we have to wait until values appear in the iR Comp Test Results area.
-      sleep(20) #sec
+      sleep(15) #sec
       #TODO: Have a retry loop checking for the iR comp values to appear
   
       #Now extract the values
