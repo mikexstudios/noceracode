@@ -163,6 +163,34 @@ class EchemSoftware
     return ocp
   end
 
+  def setup_automatic_ir_compensation(test_e = 0.0, overshoot = 2, 
+                                      step_amplitude = 0.05, comp_level = 100)
+    $log.debug 'Setting and testing automatic iR compensation...'
+
+    @main_window.activate #sets focus to window
+    AutoItX3.send_keys('!ci') #open up the control -> iR Compensation window
+    AutoItX3::Window.wait('iR Compensation')
+
+    AutoItX3.send_keys('!w') #Always enable iR Comp
+    AutoItX3.send_keys('!A') #Set iR Comp Mode to Automatic
+    AutoItX3.send_keys('!i') #Check iR Compensation for Next Run box
+
+    AutoItX3.send_keys('!E') #Test E (V)
+    AutoItX3.send_keys(test_e.to_s)
+    AutoItX3.send_keys('!S') #Step Amplitude (V)
+    AutoItX3.send_keys(overshoot.to_s)
+    AutoItX3.send_keys('!L') #Comp Level (%)
+    AutoItX3.send_keys(comp_level.to_s)
+    AutoItX3.send_keys('!v') #Overshoot (%)
+    AutoItX3.send_keys(overshoot.to_s)
+
+    #AutoItX3.send_keys('!T') #Test button
+
+    #Now we have to wait until values appear in the iR Comp Test Results area.
+
+    #AutoItX3.send_keys('{ENTER}') #OK button
+  end
+
   def setup_manual_ir_compensation(resistance)
     $log.debug 'Setting manual iR compensation...'
 

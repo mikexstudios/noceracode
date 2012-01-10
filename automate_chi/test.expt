@@ -6,5 +6,7 @@ $log.level = Logger::DEBUG
 
 require './automate_chi.rb'
 
+#iR comp from OCP and record down relevant values.
 es = EchemSoftware.new
-puts es.get_open_circuit_potential
+ocp = es.get_open_circuit_potential
+es.setup_automatic_ir_compensation(ocp)
