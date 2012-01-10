@@ -230,20 +230,24 @@ class EchemSoftware
   def save_as(filename)
     $log.debug 'Saving as...'
 
+    tries = 0
     begin
       @main_window.activate
       AutoItX3.send_keys('!fa') #file -> save as
-      AutoItX3::Window.wait('Save As')
-      saveas_window = AutoItX3::Window.new('Save As')
-      if not saveas_window.wait_active(timeout = 60) 
+      if not AutoItX3::Window.wait('Save As', timeout = 60) #seconds
         $log.error 'Save As window not found.'
         raise RuntimeError, 'Save As window not found!'
       end
+      saveas_window = AutoItX3::Window.new('Save As')
     rescue RuntimeError
+      tries += 1
       $log.info 'Retrying Save As...'
       AutoItX3.send_keys('{ESC}{ESC}')
       sleep('60') #sec
-      retry
+      retry if tries <= 3
+      #This RuntimeError should be caught by the running script (eg. it should
+      #then kill the program and restart on this point).
+      raise RuntimeError, 'Save As window not found despite retries!'
     end
     
     #The following does not work:
