@@ -370,7 +370,7 @@ class EchemSoftware
     begin
       @main_window.activate
       AutoItX3.send_keys('!fa') #file -> save as
-      if not AutoItX3::Window.wait('Save As', timeout = 60) #seconds
+      if not AutoItX3::Window.wait('Save As', '', timeout = 60) #seconds
         $log.error 'Save As window not found.'
         raise RuntimeError, 'Save As window not found!'
       end

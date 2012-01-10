@@ -2,12 +2,13 @@
 
 #Experimental parameters
 $base_path = 'C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\01-10-2012'
-$expt_name_without_metal = 'cv1 50mM KMePi 10mVs'
-$expt_name_with_metal = 'cv1 05mM Mn 50mM KMePi 10mVs'
-$pH = 1
+$expt_number = 1
+$metal_desc = '05mM Mn'
+$buffer_desc = '50mM KMePi'
+$pH = 8
 
 require 'logger' #Must be required before automate_chi.rb!
-$log_file = File.new(File.join($base_path, '%s.log' % $expt_name, 'w')
+$log_file = File.new(File.join($base_path, 'cv%i.log' % $expt_number), 'w')
 $log_file.sync = true #do not buffer
 $log = Logger.new($log_file)
 #$log = Logger.new(STDOUT)
@@ -23,9 +24,9 @@ require './automate_chi.rb'
 #@init_e set to OCP
 #@final_e set to low_e
 #sweep_segments = 2 for background, 4 for Mn system
-@scan_rate = 0.001 #V/s
+@scan_rate = 0.1 #V/s
 
-case pH
+case $pH
 when 1
  @high_e = 1.5 #V 
  @low_e = 0.0 #V 
@@ -71,7 +72,7 @@ else
 end
 
 
-def get_cv_total_time(high_e, low_e, scan_rate, segments)
+def get_cv_total_time(high_e, low_e, scan_rate, sweep_segments)
   #We need to roughly calculate the runtime of the CV. We do that by first figuring
   #out the gap in potential:
   diff_e = (high_e - low_e).abs #in V
@@ -93,13 +94,14 @@ es.setup_cyclic_voltammetry(:init_e => ocp,
                             :final_e => @low_e, 
                             :initial_scan_polarity => 'positive',
                             :scan_rate => @scan_rate,
-                            :sweep_segments => @segments, 
+                            :sweep_segments => @sweep_segments, 
                             :sensitivity => @sensitivity)
-total_time = get_cv_total_time(@high_e, @low_e, @scan_rate, @segments)
+total_time = get_cv_total_time(@high_e, @low_e, @scan_rate, @sweep_segments)
 #Check the status every "half" of the total time + 5 seconds.
 #Let the max runtime be the total calculated runtime + 60 seconds
 es.run((total_time / 2) + 5, total_time + 60)
-es.save_as($expt_name_without_metal)
+es.save_as('cv%i %s pH%i %imVs' % [$expt_number, $buffer_desc, $pH, @scan_rate * 1000])
+es.kill
 puts '-------------------------------------'
 puts
 
@@ -108,7 +110,7 @@ gets
 puts 'Really?'
 gets
 
-@segments = 4 #increase segments for actual metal run
+@sweep_segments = 4 #increase segments for actual metal run
 puts '-------------------------------------'
 $log.info 'Running CV experiment with filename: %s' % $expt_name_with_metal
 es = EchemSoftware.new
@@ -120,13 +122,14 @@ es.setup_cyclic_voltammetry(:init_e => ocp,
                             :final_e => @low_e, 
                             :initial_scan_polarity => 'positive',
                             :scan_rate => @scan_rate,
-                            :sweep_segments => @segments, 
+                            :sweep_segments => @sweep_segments, 
                             :sensitivity => @sensitivity)
-total_time = get_cv_total_time(@high_e, @low_e, @scan_rate, @segments)
+total_time = get_cv_total_time(@high_e, @low_e, @scan_rate, @sweep_segments)
 #Check the status every "half" of the total time + 5 seconds.
 #Let the max runtime be the total calculated runtime + 60 seconds
 es.run((total_time / 2) + 5, total_time + 60)
-es.save_as($expt_name_without_metal)
+es.save_as('cv%i %s %s pH%i %imVs' % [$expt_number, $metal_desc, $buffer_desc, $pH, @scan_rate * 1000])
+es.kill
 puts '-------------------------------------'
 puts
 
