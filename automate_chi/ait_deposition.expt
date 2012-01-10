@@ -6,9 +6,8 @@ $log.level = Logger::DEBUG
 
 require './automate_chi.rb'
 
-@init_e = 1.2 #V
+@init_e = 0.38 #V
 @total_charge = 32e-3 #C
-@ir_comp = 56 #Ohm
 @sample_interval = 1 #s
 @sensitivity = 1e-4 #use three scales
 @status_check_interval = 500 #s
@@ -22,7 +21,8 @@ require './automate_chi.rb'
 begin
   $log.info 'Running AIT experiment with filename: %s' % @save_filename
   es = EchemSoftware.new
-  es.setup_manual_ir_compensation(@ir_comp)
+  ocp = es.get_open_circuit_potential
+  $log.info es.setup_automatic_ir_compensation(ocp)
   es.setup_amperometric_it_curve(@init_e, @sample_interval, @run_time, 
                                  0, 3, @sensitivity) 
   es.run(@status_check_interval, @status_max_runtime)
