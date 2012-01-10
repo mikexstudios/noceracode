@@ -1,11 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'logger' #Must be required before automate_chi.rb!
-$log = Logger.new(STDOUT)
-$log.level = Logger::DEBUG
+$base_path = 'C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\01-10-2012'
 
-require './automate_chi.rb'
-
+$expt_number = 2
 @init_e = 0.38 #V
 @total_charge = 32e-3 #C
 @sample_interval = 1 #s
@@ -13,10 +10,19 @@ require './automate_chi.rb'
 @status_check_interval = 500 #s
 @status_max_runtime = 6000 #s
 
-@save_filename = 'ait2 %sV %imC dep MnKMePi pH 8' % [@init_e.to_s.delete('.'),
-                                                     (@total_charge * 1000)]
+@save_filename = 'ait%i %sV %imC dep MnKMePi pH 8' % [$expt_number, 
+                                                      @init_e.to_s.delete('.'),
+                                                      (@total_charge * 1000)]
 @run_time = 99999 #s (some large value; we use the total_charge to stop expt)
 
+
+require 'logger' #Must be required before automate_chi.rb!
+$log_file = File.new(File.join($base_path, 'ait%i.log' % $expt_number), 'w')
+$log_file.sync = true #do not buffer
+$log = Logger.new(STDOUT)
+$log.level = Logger::DEBUG
+
+require './automate_chi.rb'
 
 begin
   $log.info 'Running AIT experiment with filename: %s' % @save_filename
