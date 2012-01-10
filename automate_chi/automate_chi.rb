@@ -186,7 +186,7 @@ class EchemSoftware
 
     AutoItX3.send_keys('!T') #Test button
     #Now we have to wait until values appear in the iR Comp Test Results area.
-    sleep('15') #sec
+    sleep(20) #sec
     #TODO: Have a retry loop checking for the iR comp values to appear
   
     #Now extract the values
@@ -302,7 +302,7 @@ class EchemSoftware
       tries += 1
       $log.info 'Retrying Save As...'
       AutoItX3.send_keys('{ESC}{ESC}')
-      sleep('60') #sec
+      sleep(60) #sec
       retry if tries <= 3
       #This RuntimeError should be caught by the running script (eg. it should
       #then kill the program and restart on this point).
