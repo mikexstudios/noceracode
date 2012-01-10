@@ -9,4 +9,4 @@ require './automate_chi.rb'
 #iR comp from OCP and record down relevant values.
 es = EchemSoftware.new
 ocp = es.get_open_circuit_potential
-es.setup_automatic_ir_compensation(ocp)
+puts es.setup_automatic_ir_compensation(ocp)
