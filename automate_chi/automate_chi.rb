@@ -178,7 +178,7 @@ class EchemSoftware
     AutoItX3.send_keys('!E') #Test E (V)
     AutoItX3.send_keys(test_e.to_s)
     AutoItX3.send_keys('!S') #Step Amplitude (V)
-    AutoItX3.send_keys(overshoot.to_s)
+    AutoItX3.send_keys(step_amplitude.to_s)
     AutoItX3.send_keys('!L') #Comp Level (%)
     AutoItX3.send_keys(comp_level.to_s)
     AutoItX3.send_keys('!v') #Overshoot (%)
