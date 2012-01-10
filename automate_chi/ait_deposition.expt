@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+
+require 'logger' #Must be required before automate_chi.rb!
+$log = Logger.new(STDOUT)
+$log.level = Logger::DEBUG
+
+require './automate_chi.rb'
+
+@init_e = 1.2 #V
+@total_charge = 32e-3 #C
+@ir_comp = 56 #Ohm
+@sample_interval = 1 #s
+@sensitivity = 1e-4 #use three scales
+@status_check_interval = 500 #s
+@status_max_runtime = 6000 #s
+
+@save_filename = 'ait2 %sV %imC dep MnKMePi pH 8' % [@init_e.to_s.delete('.'),
+                                                     (@total_charge * 1000)]
+@run_time = 99999 #s (some large value; we use the total_charge to stop expt)
+
+
+begin
+  $log.info 'Running AIT experiment with filename: %s' % @save_filename
+  es = EchemSoftware.new
+  es.setup_manual_ir_compensation(@ir_comp)
+  es.setup_amperometric_it_curve(@init_e, @sample_interval, @run_time, 
+                                 0, 3, @sensitivity) 
+  es.run(@status_check_interval, @status_max_runtime)
+  es.save_as(@save_filename)
+rescue RuntimeError
+  $log.error 'RuntimeError: Retrying experiment...'
+  #Getting here means that the software has crashed. So let's try to restart
+  #it again.
+  es.kill
+  $log.info 'Killing program and sleeping for a bit...'
+  sleep(300) #5 minutes to let instrument rest
+  retry
+ensure
+  if es #when we have errors, es is automatically GC'ed and set to nil.
+    $log.info 'Killing program through ensure...'
+    es.kill
+    es = nil
+  end
+end
