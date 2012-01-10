@@ -85,6 +85,7 @@ class EchemSoftware
                :sample_interval => 0.001, 
                :sensitivity => 1.0e-6,
              }.merge(params)
+    $log.info params
 
     @main_window.activate #sets focus to window
     #NOTE: We don't  need to open up the techniques window because upon clean
