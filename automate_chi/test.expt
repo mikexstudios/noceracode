@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+require 'logger' #Must be required before automate_chi.rb!
+$log = Logger.new(STDOUT)
+$log.level = Logger::DEBUG
+
+require './automate_chi.rb'
+
+es = EchemSoftware.new
+es.get_open_circuit_potential
