@@ -204,6 +204,7 @@ class EchemSoftware
       uncomp_r = uncomp_r_control.text.to_f
 
       if resistance.strip.empty? and rc_constant.strip.empty?
+        $log.error 'iR Comp Test Results are empty!'
         raise RuntimeError, 'iR Comp Test Results are empty!'
       end
     rescue RuntimeError
@@ -212,7 +213,8 @@ class EchemSoftware
       retry if tries < 2
       #This RuntimeError should be caught by the running script (eg. it should
       #then kill the program and restart on this point).
-      raise RuntimeError, 'iR Comp Test Results are empty!'
+      $log.error 'iR Comp Test Results are empty despite retries!'
+      raise RuntimeError, 'iR Comp Test Results are empty despite retries!'
     end
 
     AutoItX3.send_keys('{ENTER}') #OK button to exit box
@@ -321,6 +323,7 @@ class EchemSoftware
       retry if tries <= 3
       #This RuntimeError should be caught by the running script (eg. it should
       #then kill the program and restart on this point).
+      $log.error 'Save As window not found despite retries.'
       raise RuntimeError, 'Save As window not found despite retries!'
     end
     
