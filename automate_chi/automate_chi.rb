@@ -160,7 +160,7 @@ class EchemSoftware
     ocp = ocp_control.text.to_f
 
     AutoItX3.send_keys('{ENTER}') #OK button
-    return ocp.text.to_f
+    return ocp
   end
 
   def setup_manual_ir_compensation(resistance)

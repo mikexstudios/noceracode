@@ -7,4 +7,4 @@ $log.level = Logger::DEBUG
 require './automate_chi.rb'
 
 es = EchemSoftware.new
-es.get_open_circuit_potential
+puts es.get_open_circuit_potential
