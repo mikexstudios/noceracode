@@ -11,11 +11,13 @@ es = EchemSoftware.new
 #ocp = es.get_open_circuit_potential
 #puts es.setup_automatic_ir_compensation(ocp)
 
-es.setup_cyclic_voltammetry(:init_e => 0.8, 
-                            :high_e => 1.2, 
-                            :low_e => 0.8, 
-                            :final_e => 0.8, 
-                            :initial_scan_polarity => 'positive',
-                            :scan_rate => 0.001, 
-                            :sweep_segments => 2, 
-                            :sensitivity => 1.0e-5)
+#es.setup_cyclic_voltammetry(:init_e => 0.8, 
+#                            :high_e => 1.2, 
+#                            :low_e => 0.8, 
+#                            :final_e => 0.8, 
+#                            :initial_scan_polarity => 'positive',
+#                            :scan_rate => 0.001, 
+#                            :sweep_segments => 2, 
+#                            :sensitivity => 1.0e-5)
+
+es.abort_experiment_at_charge(32e-3)

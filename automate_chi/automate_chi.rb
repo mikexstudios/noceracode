@@ -407,6 +407,31 @@ class EchemSoftware
     # close gets us back to a clean slate again.
     AutoItX3.send_keys('!fc') #file -> close
   end
+
+  def abort_experiment_at_charge(charge)
+    $log.debug 'Setting up Abort Experiment at Charge...'
+    $log.info 'Charge: %E' % charge
+
+    @main_window.activate #sets focus to window
+    AutoItX3.send_keys('!cu') #open up the Control -> Run Status
+
+    #Because there is no Alt accessible way of getting to the Charge edit
+    #box, we need to tab our way there. First, get to Stir Between Runs;
+    #then tab 6 times. Then uncheck Stir Between Runs.
+    AutoItX3.send_keys('!S') #Stir Between Runs
+    6.times { AutoItX3.send_keys('{TAB}') } 
+    AutoItX3.send_keys(charge.to_s)
+    AutoItX3.send_keys('!S') #Uncheck Stir Between Runs
+
+    #Also, there is no way of using the keyboard to click the radio box for 
+    #Charge (C). Thus, we use the mouse to do that.
+    techniques = AutoItX3::Control.new('Run Status', '', 'Button17')
+    techniques.click('left', 1, 36, 8)
+
+    AutoItX3.send_keys('{ENTER}')
+  end
+
+
 end
 
 #TODO: Create new expt (file -> new) and expand window again.
