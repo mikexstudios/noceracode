@@ -1,0 +1,132 @@
+#!/usr/bin/env ruby
+
+#Experimental parameters
+$base_path = 'C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\01-10-2012'
+$expt_name_without_metal = 'cv1 50mM KMePi 10mVs'
+$expt_name_with_metal = 'cv1 05mM Mn 50mM KMePi 10mVs'
+$pH = 1
+
+require 'logger' #Must be required before automate_chi.rb!
+$log_file = File.new(File.join($base_path, '%s.log' % $expt_name, 'w')
+$log_file.sync = true #do not buffer
+$log = Logger.new($log_file)
+#$log = Logger.new(STDOUT)
+$log.level = Logger::DEBUG
+
+require './automate_chi.rb'
+
+
+#Expt details: We have clean FTO plate in just buffer solution, take 10mV/s scan.
+#Then swap out the plate (we can keep this for future blank scans) for a new plate.
+#Also, add Mn to this buffer solution. Then take 10mV/s scan again.
+
+#@init_e set to OCP
+#@final_e set to low_e
+#sweep_segments = 2 for background, 4 for Mn system
+@scan_rate = 0.001 #V/s
+
+case pH
+when 1
+ @high_e = 1.5 #V 
+ @low_e = 0.0 #V 
+ @sensitivity = 1.0e-5 #A/V
+when 2
+ @high_e = 1.5 #V 
+ @low_e = 0.0 #V 
+ @sensitivity = 1.0e-5 #A/V
+when 3
+ @high_e = 1.45 #V 
+ @low_e = 0.0 #V 
+ @sensitivity = 1.0e-5 #A/V
+when 4
+ @high_e = 1.45 #V 
+ @low_e = 0.0 #V 
+ @sensitivity = 1.0e-5 #A/V
+when 5
+ @high_e = 1.4 #V 
+ @low_e = 0.0 #V 
+ @sensitivity = 1.0e-5 #A/V
+when 6
+ @high_e = 1.4 #V 
+ @low_e = 0.0 #V 
+ @sensitivity = 1.0e-5 #A/V
+when 7
+ @high_e = 1.3 #V 
+ @low_e = 0.0 #V 
+ @sensitivity = 1.0e-5 #A/V
+when 8
+ @high_e = 1.2 #V 
+ @low_e = -0.05 #V 
+ @sensitivity = 1.0e-4 #A/V
+when 9
+ @high_e = 1.1 #V 
+ @low_e = -0.10 #V 
+ @sensitivity = 1.0e-4 #A/V
+when 10
+ @high_e = 1.0 #V 
+ @low_e = -0.4 #V 
+ @sensitivity = 1.0e-4 #A/V
+else
+  raise RuntimeError, 'Invalid pH!'
+end
+
+
+def get_cv_total_time(high_e, low_e, scan_rate, segments)
+  #We need to roughly calculate the runtime of the CV. We do that by first figuring
+  #out the gap in potential:
+  diff_e = (high_e - low_e).abs #in V
+  #So for one segment:
+  seg_time = diff_e / scan_rate
+  #Then for our number of segments:
+  return seg_time * sweep_segments
+end
+
+@sweep_segments = 2 #only two segments for background scan
+puts '-------------------------------------'
+$log.info 'Running CV experiment with filename: %s' % $expt_name_without_metal
+es = EchemSoftware.new
+ocp = es.get_open_circuit_potential
+$log.info es.setup_automatic_ir_compensation(ocp)
+es.setup_cyclic_voltammetry(:init_e => ocp, 
+                            :high_e => @high_e, 
+                            :low_e => @low_e, 
+                            :final_e => @low_e, 
+                            :initial_scan_polarity => 'positive',
+                            :scan_rate => @scan_rate,
+                            :sweep_segments => @segments, 
+                            :sensitivity => @sensitivity)
+total_time = get_cv_total_time(@high_e, @low_e, @scan_rate, @segments)
+#Check the status every "half" of the total time + 5 seconds.
+#Let the max runtime be the total calculated runtime + 60 seconds
+es.run((total_time / 2) + 5, total_time + 60)
+es.save_as($expt_name_without_metal)
+puts '-------------------------------------'
+puts
+
+puts 'Please add metal to solution and switch out FTO plate. Press ENTER to continue...'
+gets
+puts 'Really?'
+gets
+
+@segments = 4 #increase segments for actual metal run
+puts '-------------------------------------'
+$log.info 'Running CV experiment with filename: %s' % $expt_name_with_metal
+es = EchemSoftware.new
+ocp = es.get_open_circuit_potential
+$log.info es.setup_automatic_ir_compensation(ocp)
+es.setup_cyclic_voltammetry(:init_e => ocp, 
+                            :high_e => @high_e, 
+                            :low_e => @low_e, 
+                            :final_e => @low_e, 
+                            :initial_scan_polarity => 'positive',
+                            :scan_rate => @scan_rate,
+                            :sweep_segments => @segments, 
+                            :sensitivity => @sensitivity)
+total_time = get_cv_total_time(@high_e, @low_e, @scan_rate, @segments)
+#Check the status every "half" of the total time + 5 seconds.
+#Let the max runtime be the total calculated runtime + 60 seconds
+es.run((total_time / 2) + 5, total_time + 60)
+es.save_as($expt_name_without_metal)
+puts '-------------------------------------'
+puts
+
