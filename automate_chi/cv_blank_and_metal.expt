@@ -84,26 +84,42 @@ end
 
 @sweep_segments = 2 #only two segments for background scan
 puts '-------------------------------------'
-$log.info 'Running CV experiment with filename: %s' % $expt_name_without_metal
-es = EchemSoftware.new
-ocp = es.get_open_circuit_potential
-$log.info es.setup_automatic_ir_compensation(ocp)
-es.setup_cyclic_voltammetry(:init_e => ocp, 
-                            :high_e => @high_e, 
-                            :low_e => @low_e, 
-                            :final_e => @low_e, 
-                            :initial_scan_polarity => 'positive',
-                            :scan_rate => @scan_rate,
-                            :sweep_segments => @sweep_segments, 
-                            :sensitivity => @sensitivity)
-total_time = get_cv_total_time(@high_e, @low_e, @scan_rate, @sweep_segments)
-#Check the status every "half" of the total time + 5 seconds.
-#Let the max runtime be the total calculated runtime + 60 seconds
-es.run((total_time / 2) + 5, total_time + 60)
-es.save_as('cv%i %s pH%i %imVs' % [$expt_number, $buffer_desc, $pH, @scan_rate * 1000])
-es.kill
+begin
+  $log.info 'Running CV experiment with filename: %s' % $expt_name_without_metal
+  es = EchemSoftware.new
+  ocp = es.get_open_circuit_potential
+  $log.info es.setup_automatic_ir_compensation(ocp)
+  es.setup_cyclic_voltammetry(:init_e => ocp, 
+                              :high_e => @high_e, 
+                              :low_e => @low_e, 
+                              :final_e => @low_e, 
+                              :initial_scan_polarity => 'positive',
+                              :scan_rate => @scan_rate,
+                              :sweep_segments => @sweep_segments, 
+                              :sensitivity => @sensitivity)
+  total_time = get_cv_total_time(@high_e, @low_e, @scan_rate, @sweep_segments)
+  #Check the status every "half" of the total time + 5 seconds.
+  #Let the max runtime be the total calculated runtime + 60 seconds
+  es.run((total_time / 2) + 5, total_time + 60)
+  es.save_as('cv%i %s pH%i %imVs' % [$expt_number, $buffer_desc, $pH, @scan_rate * 1000])
+rescue RuntimeError
+  $log.error 'RuntimeError: Retrying experiment...'
+  #Getting here means that the software has crashed. So let's try to restart
+  #it again.
+  es.kill
+  $log.info 'Killing program and sleeping for a bit...'
+  sleep(60) #1 minute to let instrument rest
+  retry
+ensure
+  if es #when we have errors, es is automatically GC'ed and set to nil.
+    $log.info 'Killing program through ensure...'
+    es.kill
+    es = nil
+  end
+end
 puts '-------------------------------------'
 puts
+
 
 puts 'Please add metal to solution and switch out FTO plate. Press ENTER to continue...'
 gets
@@ -112,24 +128,40 @@ gets
 
 @sweep_segments = 4 #increase segments for actual metal run
 puts '-------------------------------------'
-$log.info 'Running CV experiment with filename: %s' % $expt_name_with_metal
-es = EchemSoftware.new
-ocp = es.get_open_circuit_potential
-$log.info es.setup_automatic_ir_compensation(ocp)
-es.setup_cyclic_voltammetry(:init_e => ocp, 
-                            :high_e => @high_e, 
-                            :low_e => @low_e, 
-                            :final_e => @low_e, 
-                            :initial_scan_polarity => 'positive',
-                            :scan_rate => @scan_rate,
-                            :sweep_segments => @sweep_segments, 
-                            :sensitivity => @sensitivity)
-total_time = get_cv_total_time(@high_e, @low_e, @scan_rate, @sweep_segments)
-#Check the status every "half" of the total time + 5 seconds.
-#Let the max runtime be the total calculated runtime + 60 seconds
-es.run((total_time / 2) + 5, total_time + 60)
-es.save_as('cv%i %s %s pH%i %imVs' % [$expt_number, $metal_desc, $buffer_desc, $pH, @scan_rate * 1000])
-es.kill
+begin
+  $log.info 'Running CV experiment with filename: %s' % $expt_name_with_metal
+  es = EchemSoftware.new
+  ocp = es.get_open_circuit_potential
+  $log.info es.setup_automatic_ir_compensation(ocp)
+  es.setup_cyclic_voltammetry(:init_e => ocp, 
+                              :high_e => @high_e, 
+                              :low_e => @low_e, 
+                              :final_e => @low_e, 
+                              :initial_scan_polarity => 'positive',
+                              :scan_rate => @scan_rate,
+                              :sweep_segments => @sweep_segments, 
+                              :sensitivity => @sensitivity)
+  total_time = get_cv_total_time(@high_e, @low_e, @scan_rate, @sweep_segments)
+  #Check the status every "half" of the total time + 5 seconds.
+  #Let the max runtime be the total calculated runtime + 60 seconds
+  es.run((total_time / 2) + 5, total_time + 60)
+  es.save_as('cv%i %s %s pH%i %imVs' % [$expt_number, $metal_desc, $buffer_desc, $pH, @scan_rate * 1000])
+rescue RuntimeError
+  $log.error 'RuntimeError: Retrying experiment...'
+  #Getting here means that the software has crashed. So let's try to restart
+  #it again.
+  es.kill
+  $log.info 'Killing program and sleeping for a bit...'
+  sleep(60) #1 minute to let instrument rest
+  retry
+ensure
+  if es #when we have errors, es is automatically GC'ed and set to nil.
+    $log.info 'Killing program through ensure...'
+    es.kill
+    es = nil
+  end
+end
 puts '-------------------------------------'
 puts
 
+puts 'END'
