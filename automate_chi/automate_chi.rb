@@ -185,20 +185,35 @@ class EchemSoftware
     AutoItX3.send_keys(overshoot.to_s)
 
     AutoItX3.send_keys('!T') #Test button
-    #Now we have to wait until values appear in the iR Comp Test Results area.
-    sleep(20) #sec
-    #TODO: Have a retry loop checking for the iR comp values to appear
-  
-    #Now extract the values
-    resistance_control = AutoItX3::Control.new('iR Compensation', '', 'Edit1')
-    rc_constant_control = AutoItX3::Control.new('iR Compensation', '', 'Edit2')
-    comp_level_control = AutoItX3::Control.new('iR Compensation', '', 'Edit3')
-    uncomp_r_control = AutoItX3::Control.new('iR Compensation', '', 'Edit4')
 
-    resistance = resistance_control.text.to_f
-    rc_constant = rc_constant_control.text.to_f
-    comp_level = comp_level_control.text.to_f
-    uncomp_r = uncomp_r_control.text.to_f
+    tries = 0
+    begin
+      #Now we have to wait until values appear in the iR Comp Test Results area.
+      sleep(20) #sec
+      #TODO: Have a retry loop checking for the iR comp values to appear
+  
+      #Now extract the values
+      resistance_control = AutoItX3::Control.new('iR Compensation', '', 'Edit1')
+      rc_constant_control = AutoItX3::Control.new('iR Compensation', '', 'Edit2')
+      comp_level_control = AutoItX3::Control.new('iR Compensation', '', 'Edit3')
+      uncomp_r_control = AutoItX3::Control.new('iR Compensation', '', 'Edit4')
+
+      resistance = resistance_control.text.to_f
+      rc_constant = rc_constant_control.text.to_f
+      comp_level = comp_level_control.text.to_f
+      uncomp_r = uncomp_r_control.text.to_f
+
+      if resistance.strip.empty? and rc_constant.strip.empty?
+        raise RuntimeError, 'iR Comp Test Results are empty!'
+      end
+    rescue RuntimeError
+      tries += 1
+      $log.info 'Retrying reading iR Comp Test Results...'
+      retry if tries < 2
+      #This RuntimeError should be caught by the running script (eg. it should
+      #then kill the program and restart on this point).
+      raise RuntimeError, 'iR Comp Test Results are empty!'
+    end
 
     AutoItX3.send_keys('{ENTER}') #OK button to exit box
 
