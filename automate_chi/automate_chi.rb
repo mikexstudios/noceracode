@@ -300,7 +300,7 @@ class EchemSoftware
     AutoItX3.send_keys('{ENTER}') #OK button
   end
 
-  def run(check_interval = 10, max_runtime = nil)
+  def run(check_interval = 10, max_runtime = nil, is_information_expected = false)
     $log.debug 'Running experiment...'
     @main_window.activate
     AutoItX3.send_keys('!cr') #control -> run experiment
@@ -333,34 +333,53 @@ class EchemSoftware
         $log.error 'Detected Error window (probably Link Failed).'
         raise RuntimeError, 'Software has an error! Please restart experiment.'
       end
+
+      #If we are limiting by charge, the experiment will end when the Information
+      #window appears. Thus, we will detect that instead.
+      if is_information_expected
+        if AutoItX3::Window.wait('Information', '', max_runtime)
+          $log.info 'Information window found! Assuming experiment has ended.'
+          information_window = AutoItX3::Window.new('Information')
+          #Close the window
+          information_window.close
+          #Make sure that window does not exist anymore
+          information_window.wait_close
     
-      #Check if experiment has completed with the menu method.
-      #TODO: Implement the pixel detection method.
-      AutoItX3.send_keys('!vl') #view -> data listing
-      #Wait for some timeout time so that we don't accidentally miss the window.
-      #NOTE: This will add to our status_check_interval...
-      if AutoItX3::Window.wait('Data List', '', DATA_LIST_WINDOW_TIMEOUT)
-        $log.info 'Data List window found! Assuming experiment has ended.'
-        datalist_window = AutoItX3::Window.new('Data List')
-        #Close the window
-        datalist_window.close
-        #Make sure that window does not exist anymore
-        datalist_window.wait_close
-    
-        #Experiment has completed!
-        break
+          #Experiment has completed!
+          break
+        else
+          $log.error 'Exceeded maximum runtime. Software may have crashed.'
+          raise RuntimeError, 'Exceeded maximum runtime! Software may have crashed!'
+        end
+      else
+        #Check if experiment has completed with the menu method.
+        #TODO: Implement the pixel detection method.
+        AutoItX3.send_keys('!vl') #view -> data listing
+        #Wait for some timeout time so that we don't accidentally miss the window.
+        #NOTE: This will add to our status_check_interval...
+        if AutoItX3::Window.wait('Data List', '', DATA_LIST_WINDOW_TIMEOUT)
+          $log.info 'Data List window found! Assuming experiment has ended.'
+          datalist_window = AutoItX3::Window.new('Data List')
+          #Close the window
+          datalist_window.close
+          #Make sure that window does not exist anymore
+          datalist_window.wait_close
+      
+          #Experiment has completed!
+          break
+        end
+        total_runtime += DATA_LIST_WINDOW_TIMEOUT
+      
+        #Check if our total runtime is grossly above the expected runtime. If so, 
+        #we can assume that the experiment is frozen or crashed and end the experiment.
+        if max_runtime != nil and total_runtime >= max_runtime
+          $log.error 'Exceeded maximum runtime. Software may have crashed.'
+          raise RuntimeError, 'Exceeded maximum runtime! Software may have crashed!'
+        end
+      
+        print '.' #for progress
+  	$log.debug '.'
       end
-      total_runtime += DATA_LIST_WINDOW_TIMEOUT
-    
-      #Check if our total runtime is grossly above the expected runtime. If so, 
-      #we can assume that the experiment is frozen or crashed and end the experiment.
-      if max_runtime != nil and total_runtime >= max_runtime
-        $log.error 'Exceeded maximum runtime. Software may have crashed.'
-        raise RuntimeError, 'Exceeded maximum runtime! Software may have crashed!'
-      end
-    
-      print '.' #for progress
-	  $log.debug '.'
     end
   end
 

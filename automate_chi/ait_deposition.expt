@@ -35,7 +35,7 @@ begin
 
   es.setup_amperometric_it_curve(@init_e, @sample_interval, @run_time, 
                                  0, 3, @sensitivity) 
-  es.run(@status_check_interval, @status_max_runtime)
+  es.run(@status_check_interval, @status_max_runtime, true)
   es.save_as(@save_filename)
 rescue RuntimeError
   $log.error 'RuntimeError: Retrying experiment...'
