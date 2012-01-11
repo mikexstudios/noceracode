@@ -27,8 +27,12 @@ require './automate_chi.rb'
 begin
   $log.info 'Running AIT experiment with filename: %s' % @save_filename
   es = EchemSoftware.new
+
   ocp = es.get_open_circuit_potential
   $log.info es.setup_automatic_ir_compensation(ocp)
+
+  es.abort_experiment_at_charge(@total_charge)
+
   es.setup_amperometric_it_curve(@init_e, @sample_interval, @run_time, 
                                  0, 3, @sensitivity) 
   es.run(@status_check_interval, @status_max_runtime)
