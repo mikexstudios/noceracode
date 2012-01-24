@@ -179,6 +179,8 @@ end
 if __FILE__ == $0
   if not ARGV[0]
     puts 'Usage: %s [cv_data.txt] {segment range}' % $0
+    puts 'NOTE: {segment range} is specified as integer or Ruby range'
+    puts '      and begins at 0. For example: 2, 2..3, 0..-2.'
     exit
   end
   
