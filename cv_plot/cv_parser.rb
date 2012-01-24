@@ -71,7 +71,7 @@ class CVParser
   def get_segment(range)
     segment_data
 
-    return @segments
+    return @segments.slice(range)
   end
 
   private
@@ -160,6 +160,4 @@ cv.parse
 p cv.data
 p cv.get_potential_range
 p cv.get_current_range
-s = cv.get_segment nil
-puts s.length
-p s
+p cv.get_segment 2
