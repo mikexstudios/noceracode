@@ -76,6 +76,14 @@ class CVParser
     return @segments.slice(range)
   end
 
+  def get_segment_as_csv(range = 0..-1) #default: full range
+    data = get_segment(range)
+
+    return data.map do |segment| #we may have multiple returned segments
+      segment.map { |point| point.to_csv }.join
+    end.join #join array elements to string
+  end
+
   private
 
   def calculate_potential_current_ranges
@@ -170,8 +178,8 @@ if __FILE__ == $0
   if not segment_range.nil?
     #1. Just one segment
     if segment_range.index('..') #we find a range specification
-      r = *(segment_range.split('..').map {|s| s.to_i})
-      segment_range = Range.new(r)
+      r = segment_range.split('..').map {|s| s.to_i}
+      segment_range = Range.new(*r)
     else
       #2. Assume single integer
       segment_range = segment_range.to_i
@@ -184,5 +192,5 @@ if __FILE__ == $0
   
   cv = CVParser.new(cv_path)
   cv.parse
-  p cv.get_segment segment_range
+  puts cv.get_segment_as_csv segment_range
 end
