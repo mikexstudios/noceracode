@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'CSV'
 
 class CVParser
@@ -68,7 +70,7 @@ class CVParser
     return [@low_i, @high_i]
   end
 
-  def get_segment(range)
+  def get_segment(range = 0..-1) #default to full range
     segment_data
 
     return @segments.slice(range)
@@ -155,9 +157,32 @@ class CVParser
 
 end
 
-cv = CVParser.new('cv9 05mm mn 50mm kbi ph9 10mvs.txt')
-cv.parse
-p cv.data
-p cv.get_potential_range
-p cv.get_current_range
-p cv.get_segment 2
+#Ability to run the script standalone if not required/included.
+if __FILE__ == $0
+  if not ARGV[0]
+    puts 'Usage: %s [cv_data.txt] {segment range}' % $0
+    exit
+  end
+  
+  cv_path = ARGV[0]
+  segment_range = ARGV[1]
+  #We have three cases for the supplied segment range.
+  if not segment_range.nil?
+    #1. Just one segment
+    if segment_range.index('..') #we find a range specification
+      r = *(segment_range.split('..').map {|s| s.to_i})
+      segment_range = Range.new(r)
+    else
+      #2. Assume single integer
+      segment_range = segment_range.to_i
+    end
+  else
+    #3. No range specified
+    segment_range = 0..-1 #full range
+  end
+
+  
+  cv = CVParser.new(cv_path)
+  cv.parse
+  p cv.get_segment segment_range
+end
