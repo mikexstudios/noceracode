@@ -73,15 +73,25 @@ class CVParser
   def get_segment(range = 0..-1) #default to full range
     segment_data
 
+    #If range is specified as an integer instead of a range, make it a range
+    #such that the return slice is wrapped in an array, for consistentcy 
+    #purposes.
+    #ie. [1, 2, 3, 4].slice(1) => 2
+    #    [1, 2, 3, 4].slice(1..1) => [2]
+    range = Range.new(range, range) if range.is_a? Integer
+
     return @segments.slice(range)
   end
 
   def get_segment_as_csv(range = 0..-1) #default: full range
     data = get_segment(range)
 
+    data.unshift([['potential', 'current']]) #CSV header
+
     return data.map do |segment| #we may have multiple returned segments
       segment.map { |point| point.to_csv }.join
     end.join #join array elements to string
+    #end.join("\n") #join array elements to string
   end
 
   private
