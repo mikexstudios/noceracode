@@ -110,7 +110,7 @@ class CVParser
     #We keep track of the last point so that we can take the difference.
     last_point = nil
     last_direction = nil
-    last_segment_i = 0 #index of @data where last segment stopped + 1
+    last_segment_i = 0 #index of @data where last segment stopped
 
     @data.each_with_index do |point, current_i|
       if last_point.nil?
@@ -121,10 +121,12 @@ class CVParser
       current_direction = determine_direction_of_scan(last_point, point) 
       if current_direction != last_direction and current_direction != 0 \
         and not last_direction.nil?
-        #Segment the data at this point
-        @segments.push(@data.slice(last_segment_i..current_i))
+        #Segment the data at this point. We slice to current_i - 1 since 
+        #the current_i is where the change happened; we want to end at
+        #the previous point.
+        @segments.push(@data.slice(last_segment_i..(current_i-1)))
 
-        last_segment_i = current_i + 1
+        last_segment_i = current_i
       end
 
       last_point = point
@@ -160,3 +162,4 @@ p cv.get_potential_range
 p cv.get_current_range
 s = cv.get_segment nil
 puts s.length
+p s
