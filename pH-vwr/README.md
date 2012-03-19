@@ -22,3 +22,16 @@ KEY K     KEY <key> Meas Cal Up Down Setup loG stiR decPt poWer Line
 METHOD    METHOD
 SETMENU   SETMENU name value
 SYSTEM    returns system information
+
+
+Sidenote
+========
+
+The interesting thing is that the Trendnet USB to Serial connector and the 
+USB Net Power 8800 both use the same chip to convert from USB to Serial. 
+Thus, when modifying the USB driver for the Net Power 8800 device, the Trendnet
+driver will also seemingly be changed. Rollback the device driver on the 
+Trendnet device only.
+
+TODO: It may be possible to simply control the Net Power 8800 through serial.
+That would elminate additional layer of USB complexity.
