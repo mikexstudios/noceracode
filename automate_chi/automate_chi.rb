@@ -339,13 +339,15 @@ class EchemSoftware
     #TODO: Don't use a counter for time. Instead, use the computer's clock.
     total_runtime = 0 #sec, we keep track of how long the expt has run
     while true
+	  sleep(5)
+	  
 	  #Check if we have an Error window.
       if AutoItX3::Window.exists?('Error')
         $log.error 'Detected Error window (probably Link Failed).'
         raise RuntimeError, 'Software has an error! Please restart experiment.'
       end
 	  
-      sleep(check_interval)
+      sleep(check_interval-5)
       total_runtime += check_interval
     
       #Check if program has crashed.
