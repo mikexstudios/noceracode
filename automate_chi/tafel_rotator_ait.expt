@@ -1,0 +1,84 @@
+#!/usr/bin/env ruby
+
+require 'logger' #Must be required before automate_chi.rb!
+#$log_file = File.new('Z:\Labs\noceracode\automate_chi\test.log', 'w')
+#$log_file = File.new('C:\Documents and Settings\Electrochemistry\My Documents\Dropbox\Electrochemistry\Mike\01-04-2012\tafel8\tafel_cp.log', 'w')
+$log_file = File.new('C:\Users\Pot760Dblack\Dropbox\Electrochemistry\Mike\03-20-2012\01rotator\rotator.log', 'w')
+$log_file.sync = true #do not buffer
+$log = Logger.new($log_file)
+#$log = Logger.new(STDOUT)
+$log.level = Logger::DEBUG
+
+require './automate_chi.rb'
+
+def run_rotator_ait
+  puts '-------------------------------------'
+  begin
+    $log.info 'Running rotator experiment with filename: %s' % @save_filename
+    es = EchemSoftware.new
+    es.setup_manual_ir_compensation(@ir_comp)
+    es.setup_rotating_disk_electrode(@rde_rpm)
+    es.setup_amperometric_it_curve(@init_e, @sample_interval, @run_time, 
+                                   0, 3, @sensitivity) 
+    es.run(@status_check_interval, @status_max_runtime)
+    es.save_as(@save_filename)
+  rescue RuntimeError
+    $log.error 'RuntimeError: Retrying experiment...'
+    #Getting here means that the software has crashed. So let's try to restart
+    #it again.
+    es.kill
+    $log.info 'Killing program and sleeping for a bit...'
+    sleep(300) #5 minutes to let instrument rest
+    retry
+  ensure
+    if es #when we have errors, es is automatically GC'ed and set to nil.
+      $log.info 'Killing program through ensure...'
+      es.kill
+      es = nil
+    end
+  end
+  puts '-------------------------------------'
+  puts
+end
+
+#Experiment variables
+@stir_time = 30 #sec. On highest rot, we double the stir time.
+@run_time = 60 #sec
+#The sensitivity must be specified as 1e-n where n = [1, 12], because that
+#is what the potentiostat can handle.
+@sensitivity = 1e-5
+@sample_interval = 0.5 #sec
+@ir_comp = 9 #ohm
+
+#The following is for our own purposes for defining the potential range and step
+@potential_range = (0.25..0.37) #V
+#@step = (@potential_range.last - @potential_range.first) / 12.0
+@step = 0.02 #V
+@rotation_velocities = [2500, 1600, 1225, 900, 625] #rpm
+
+@status_check_interval = (@stir_time + @run_time + 10) / 2 #sec
+#When our runtime exceeds the maximum runtime given below, we assume the experi
+#has crashed and exit from loop.
+@status_max_runtime = (@stir_time + @run_time) + 20 #sec
+
+
+#We run from high potential to low potential
+for pass in 1..1
+  potentials = @potential_range.step(@step).to_a.map {|x| x.round(3)}
+  potentials.reverse! #for from high to low
+  $log.info('Potentials: %s' % potentials.to_s)
+  
+  #For each potential, we loop through specified rotation velocities.
+  potentials.each_with_index do |p, i|
+    @init_e = p
+    #Dynamic sensitivity mod
+    @sensitivity = 1e-6 if p <= 0.27
+
+    @rotation_velocities.each do |rpm|
+      @rde_rpm = rpm
+
+      @save_filename  = '%02ip_%03i_%irpm.bin' % [pass, p * 100, rpm]
+      run_rotator_ait
+    end
+  end
+end
