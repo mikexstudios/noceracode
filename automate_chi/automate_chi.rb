@@ -310,13 +310,13 @@ class EchemSoftware
     AutoItX3.send_keys(rpm.to_s)
     #Rotate during deposition time should already be checked so we skip that
 	AutoItX3.send_keys('!D') #Rotate during Deposition Time
-	AutoItX3.send_keys('+') #Force the checkbox
+	AutoItX3.send_keys('++') #Force the checkbox
     AutoItX3.send_keys('!Q') #Rotate during Quiet Time
-	AutoItX3.send_keys('+') #Force the checkbox
+	AutoItX3.send_keys('++') #Force the checkbox
     AutoItX3.send_keys('!R') #Rotate during Run
-	AutoItX3.send_keys('+') #Force the checkbox
+	AutoItX3.send_keys('++') #Force the checkbox
     AutoItX3.send_keys('!b') #Rotate between Run
-	AutoItX3.send_keys('+') #Force the checkbox
+	AutoItX3.send_keys('++') #Force the checkbox
     AutoItX3.send_keys('{ENTER}') #OK button
   end
 
