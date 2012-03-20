@@ -1,0 +1,5 @@
+Tips on macros
+==============
+
+* When using RDE related commands, they don't actually get executed until
+  the run command is issued, for some reason.
