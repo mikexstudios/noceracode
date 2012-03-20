@@ -2,11 +2,14 @@
 # Class to control VWR's sympHony pH meter through serial port
 
 require 'serialport'
+require 'timeout'
 
 # pH meter MUST have the following settings (set using Menu):
 #  * Baud rate = 9600
 #  * Output = Comp (not printer)
 class PHVWR
+  attr_accessor :pH, :temp
+  
   # port_num integer Either /dev/ttySN or COM(N+1) where N is the port_num
   #                  So to specify COM1 in Windows, use port_num = 0.
   def initialize(port_num)
@@ -20,13 +23,19 @@ class PHVWR
     #> 2,C00923,2.22,10,01-23-2083 07:43:45,8.01,pH,-62.7,mV,23.2,C,60,19670
     #| not sure     |       datetime       |  pH   | raw E  | temp | not sure |
     #These fields seem fixed so we can simply split by ',' and index by number.
-    line = self.send('GETMEAS')
+	@pH = nil
+	@temp = nil
+	
+    line = send('GETMEAS')
     line = line.split(',')
-    fail if line[6] != 'pH'
-    fail if line[10] != 'C'
+    if line.empty? or line[6] != 'pH' or line[10] != 'C'
+	  return {'pH' => nil, 'temp' => nil}
+	end
 
     @pH = line[5].to_f
     @temp = line[9].to_f
+	
+	return {'pH' => @pH, 'temp' => @temp}
   end
 
   private
@@ -53,10 +62,19 @@ class PHVWR
   # NOTE: Can only read one line! So only works for short return buffers such
   #       as getting pH value.
   def send(cmd)
-    self.open
-    @sp.write "%s\r\n" % cmd
-    line = @sp.readline
-    self.close
+    line = nil
+    tries = 0
+    begin
+      Timeout::timeout(3) {
+        open
+        @sp.write "%s\r\n" % cmd
+        line = @sp.readline
+        close
+	  }
+	rescue Timeout::Error
+	  tries += 1
+	  retry if tries <= 2
+	end
 
     return line
   end
