@@ -309,9 +309,14 @@ class EchemSoftware
     AutoItX3.send_keys('!S') #Get to Rotation Speed (rpm)
     AutoItX3.send_keys(rpm.to_s)
     #Rotate during deposition time should already be checked so we skip that
+	AutoItX3.send_keys('!D') #Rotate during Deposition Time
+	AutoItX3.send_keys('+') #Force the checkbox
     AutoItX3.send_keys('!Q') #Rotate during Quiet Time
+	AutoItX3.send_keys('+') #Force the checkbox
     AutoItX3.send_keys('!R') #Rotate during Run
+	AutoItX3.send_keys('+') #Force the checkbox
     AutoItX3.send_keys('!b') #Rotate between Run
+	AutoItX3.send_keys('+') #Force the checkbox
     AutoItX3.send_keys('{ENTER}') #OK button
   end
 
@@ -334,6 +339,12 @@ class EchemSoftware
     #TODO: Don't use a counter for time. Instead, use the computer's clock.
     total_runtime = 0 #sec, we keep track of how long the expt has run
     while true
+	  #Check if we have an Error window.
+      if AutoItX3::Window.exists?('Error')
+        $log.error 'Detected Error window (probably Link Failed).'
+        raise RuntimeError, 'Software has an error! Please restart experiment.'
+      end
+	  
       sleep(check_interval)
       total_runtime += check_interval
     
@@ -341,12 +352,6 @@ class EchemSoftware
       if @main_window.hung?
         $log.error 'Detected main window hung.'
         raise RuntimeError, 'Software has crashed! Please restart experiment.'
-      end
-    
-      #Check if we have an Error window.
-      if AutoItX3::Window.exists?('Error')
-        $log.error 'Detected Error window (probably Link Failed).'
-        raise RuntimeError, 'Software has an error! Please restart experiment.'
       end
 
       #If we are limiting by charge, the experiment will end when the Information
