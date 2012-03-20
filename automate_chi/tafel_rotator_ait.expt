@@ -10,9 +10,11 @@ $log = Logger.new($log_file)
 $log.level = Logger::DEBUG
 
 require './automate_chi.rb'
+require '../usbnetpower8800/usbnetpower8800.rb'
+@stir_plate = USBNetPower8800.new
 
 def run_rotator_ait
-  puts '-------------------------------------'
+  #puts '-------------------------------------'
   begin
     $log.info 'Running rotator experiment with filename: %s' % @save_filename
     es = EchemSoftware.new
@@ -23,6 +25,11 @@ def run_rotator_ait
 	#technique. If called before, then the rpm will be reset to zero once
 	#a technique settings are filled in.
 	es.setup_rotating_disk_electrode(@rde_rpm)
+	Thread.new {
+	  @stir_plate.on
+	  sleep(@stir_time)
+	  @stir_plate.off
+	}
     es.run(@status_check_interval, @status_max_runtime)
     es.save_as(@save_filename)
   rescue RuntimeError
@@ -40,14 +47,14 @@ def run_rotator_ait
       es = nil
     end
   end
-  puts '-------------------------------------'
-  puts
+  #puts '-------------------------------------'
+  #puts
+  print '.',
 end
 
 #Experiment variables
 @stir_time = 10 #sec. On highest rot, we double the stir time.
 @collect_time = 20 #sec
-@run_time = @stir_time + @collect_time #sec
 #The sensitivity must be specified as 1e-n where n = [1, 12], because that
 #is what the potentiostat can handle.
 @sensitivity = 1e-5
@@ -60,10 +67,7 @@ end
 @step = 0.02 #V
 @rotation_velocities = [2500, 1600, 1225, 900, 625] #rpm
 
-@status_check_interval = (@run_time + 10) / 2 #sec
-#When our runtime exceeds the maximum runtime given below, we assume the experi
-#has crashed and exit from loop.
-@status_max_runtime = @run_time + 20 #sec
+
 
 
 #We run from high potential to low potential
@@ -77,8 +81,14 @@ for pass in 1..1
     @init_e = p
     #Dynamic sensitivity mod
     @sensitivity = 1e-6 if p <= 0.27
-
+	
     @rotation_velocities.each do |rpm|
+	  @run_time = @stir_time + @collect_time 
+	  @status_check_interval = (@run_time + 10) / 2 #sec
+      #When our runtime exceeds the maximum runtime given below, we assume the experi
+      #has crashed and exit from loop.
+      @status_max_runtime = @run_time + 20 #sec
+	  
       @rde_rpm = rpm
 
       @save_filename  = '%02ip_%03i_%irpm.bin' % [pass, p * 100, rpm]
@@ -99,3 +109,5 @@ ensure
     es = nil
   end
 end
+
+stir_plate.close
