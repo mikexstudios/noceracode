@@ -12,9 +12,11 @@ $log.level = Logger::DEBUG
 require './automate_chi.rb'
 require '../usbnetpower8800/usbnetpower8800.rb'
 @stir_plate = USBNetPower8800.new
+require '../pH-vwr/pH-vwr.rb'
+@pH_meter = PHVWR.new(4) #COM5
 
 def run_rotator_ait
-  #puts '-------------------------------------'
+  $log.info '-------------------------------------'
   begin
     $log.info 'Running rotator experiment with filename: %s' % @save_filename
     es = EchemSoftware.new
@@ -32,6 +34,11 @@ def run_rotator_ait
 	}
     es.run(@status_check_interval, @status_max_runtime)
     es.save_as(@save_filename)
+	
+	#Get pH at final point
+	m = @pH_meter.measure
+	$log.info 'pH: %f' % m['pH']
+	$log.info 'Temp: %f' % m['temp']
   rescue RuntimeError
     $log.error 'RuntimeError: Retrying experiment...'
     #Getting here means that the software has crashed. So let's try to restart
@@ -47,8 +54,8 @@ def run_rotator_ait
       es = nil
     end
   end
-  #puts '-------------------------------------'
-  #puts
+  $log.info '-------------------------------------'
+  $log.info
   print '.',
 end
 
