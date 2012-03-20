@@ -17,9 +17,12 @@ def run_rotator_ait
     $log.info 'Running rotator experiment with filename: %s' % @save_filename
     es = EchemSoftware.new
     es.setup_manual_ir_compensation(@ir_comp)
-    es.setup_rotating_disk_electrode(@rde_rpm)
     es.setup_amperometric_it_curve(@init_e, @sample_interval, @run_time, 
                                    0, 3, @sensitivity) 
+	#A quirk with the software is that RDE settings MUST be called after a
+	#technique. If called before, then the rpm will be reset to zero once
+	#a technique settings are filled in.
+	es.setup_rotating_disk_electrode(@rde_rpm)
     es.run(@status_check_interval, @status_max_runtime)
     es.save_as(@save_filename)
   rescue RuntimeError
@@ -28,7 +31,7 @@ def run_rotator_ait
     #it again.
     es.kill
     $log.info 'Killing program and sleeping for a bit...'
-    sleep(300) #5 minutes to let instrument rest
+    sleep(60) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
@@ -42,8 +45,9 @@ def run_rotator_ait
 end
 
 #Experiment variables
-@stir_time = 30 #sec. On highest rot, we double the stir time.
-@run_time = 60 #sec
+@stir_time = 10 #sec. On highest rot, we double the stir time.
+@collect_time = 20 #sec
+@run_time = @stir_time + @collect_time #sec
 #The sensitivity must be specified as 1e-n where n = [1, 12], because that
 #is what the potentiostat can handle.
 @sensitivity = 1e-5
@@ -56,10 +60,10 @@ end
 @step = 0.02 #V
 @rotation_velocities = [2500, 1600, 1225, 900, 625] #rpm
 
-@status_check_interval = (@stir_time + @run_time + 10) / 2 #sec
+@status_check_interval = (@run_time + 10) / 2 #sec
 #When our runtime exceeds the maximum runtime given below, we assume the experi
 #has crashed and exit from loop.
-@status_max_runtime = (@stir_time + @run_time) + 20 #sec
+@status_max_runtime = @run_time + 20 #sec
 
 
 #We run from high potential to low potential
@@ -80,5 +84,18 @@ for pass in 1..1
       @save_filename  = '%02ip_%03i_%irpm.bin' % [pass, p * 100, rpm]
       run_rotator_ait
     end
+  end
+end
+
+#Turn off RDE
+begin
+  $log.info 'Running rotator experiment with filename: %s' % @save_filename
+  es = EchemSoftware.new
+  es.setup_rotating_disk_electrode(0)
+ensure
+  if es #when we have errors, es is automatically GC'ed and set to nil.
+    $log.info 'Killing program through ensure...'
+    es.kill
+    es = nil
   end
 end
