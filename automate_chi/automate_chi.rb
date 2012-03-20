@@ -300,6 +300,21 @@ class EchemSoftware
     AutoItX3.send_keys('{ENTER}') #OK button
   end
 
+  def setup_rotating_disk_electrode(rpm)
+    $log.debug 'Setting rotating disk electrode...'
+
+    @main_window.activate #sets focus to window
+    AutoItX3.send_keys('!ck') #open up the control -> Rotating disk electrode
+    AutoItX3::Window.wait('Rotating Disk Electrode Control')
+    AutoItX3.send_keys('!S') #Get to Rotation Speed (rpm)
+    AutoItX3.send_keys(rpm.to_s)
+    #Rotate during deposition time should already be checked so we skip that
+    AutoItX3.send_keys('!Q') #Rotate during Quiet Time
+    AutoItX3.send_keys('!R') #Rotate during Run
+    AutoItX3.send_keys('!b') #Rotate between Run
+    AutoItX3.send_keys('{ENTER}') #OK button
+  end
+
   def run(check_interval = 10, max_runtime = nil, is_information_expected = false)
     $log.debug 'Running experiment...'
     @main_window.activate
