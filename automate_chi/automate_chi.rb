@@ -294,6 +294,7 @@ class EchemSoftware
     AutoItX3::Window.wait('iR Compensation')
     AutoItX3.send_keys('!w') #Always enable iR Comp
     AutoItX3.send_keys('!M') #Set iR Comp Mode to Manual
+	sleep(0.25) #sec, let the next checkbox be enabled
     AutoItX3.send_keys('!i') #Check iR Compensation for Next Run box
     AutoItX3.send_keys('!R') #Resistance (ohm) under Manual Comp
     AutoItX3.send_keys(resistance.to_s)
