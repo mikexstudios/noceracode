@@ -294,9 +294,30 @@ class EchemSoftware
     AutoItX3::Window.wait('iR Compensation')
     AutoItX3.send_keys('!w') #Always enable iR Comp
     AutoItX3.send_keys('!M') #Set iR Comp Mode to Manual
+	sleep(0.25) #sec, let the next checkbox be enabled
     AutoItX3.send_keys('!i') #Check iR Compensation for Next Run box
     AutoItX3.send_keys('!R') #Resistance (ohm) under Manual Comp
     AutoItX3.send_keys(resistance.to_s)
+    AutoItX3.send_keys('{ENTER}') #OK button
+  end
+
+  def setup_rotating_disk_electrode(rpm)
+    $log.debug 'Setting rotating disk electrode...'
+
+    @main_window.activate #sets focus to window
+    AutoItX3.send_keys('!ck') #open up the control -> Rotating disk electrode
+    AutoItX3::Window.wait('Rotating Disk Electrode Control')
+    AutoItX3.send_keys('!S') #Get to Rotation Speed (rpm)
+    AutoItX3.send_keys(rpm.to_s)
+    #Rotate during deposition time should already be checked so we skip that
+	AutoItX3.send_keys('!D') #Rotate during Deposition Time
+	AutoItX3.send_keys('-=') #Force the checkbox
+    AutoItX3.send_keys('!Q') #Rotate during Quiet Time
+	AutoItX3.send_keys('-=') #Force the checkbox
+    AutoItX3.send_keys('!R') #Rotate during Run
+	AutoItX3.send_keys('-=') #Force the checkbox
+    AutoItX3.send_keys('!b') #Rotate between Run
+	AutoItX3.send_keys('-=') #Force the checkbox
     AutoItX3.send_keys('{ENTER}') #OK button
   end
 
@@ -319,19 +340,21 @@ class EchemSoftware
     #TODO: Don't use a counter for time. Instead, use the computer's clock.
     total_runtime = 0 #sec, we keep track of how long the expt has run
     while true
-      sleep(check_interval)
+	  sleep(5)
+	  
+	  #Check if we have an Error window.
+      if AutoItX3::Window.exists?('Error')
+        $log.error 'Detected Error window (probably Link Failed).'
+        raise RuntimeError, 'Software has an error! Please restart experiment.'
+      end
+	  
+      sleep(check_interval-5)
       total_runtime += check_interval
     
       #Check if program has crashed.
       if @main_window.hung?
         $log.error 'Detected main window hung.'
         raise RuntimeError, 'Software has crashed! Please restart experiment.'
-      end
-    
-      #Check if we have an Error window.
-      if AutoItX3::Window.exists?('Error')
-        $log.error 'Detected Error window (probably Link Failed).'
-        raise RuntimeError, 'Software has an error! Please restart experiment.'
       end
 
       #If we are limiting by charge, the experiment will end when the Information

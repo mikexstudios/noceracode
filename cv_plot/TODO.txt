@@ -1,0 +1,8 @@
+Things to add:
+
+1. Output third column containing segment number, this can help shading the plot
+   in R to see progression of the CV.
+
+2. Ability to combine multiple CVs into one CSV file with a third column writing
+   the CV number. This can help plot multiple CVs...
+   => Well, easier to just do this manually.
