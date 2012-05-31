@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 
 #Experimental parameters
-$base_path = 'C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\01-10-2012'
-$expt_number = 1
+$base_path = 'C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\01-11-2012'
+$expt_number = 10
 $metal_desc = '05mM Mn'
 $buffer_desc = '50mM KMePi'
-$pH = 8
+$pH = 12
 
 require 'logger' #Must be required before automate_chi.rb!
 $log_file = File.new(File.join($base_path, 'cv%i.log' % $expt_number), 'w')
@@ -24,7 +24,7 @@ require './automate_chi.rb'
 #@init_e set to OCP
 #@final_e set to low_e
 #sweep_segments = 2 for background, 4 for Mn system
-@scan_rate = 0.1 #V/s
+@scan_rate = 0.01 #V/s
 
 case $pH
 when 1
@@ -48,7 +48,7 @@ when 5
  @low_e = 0.0 #V 
  @sensitivity = 1.0e-5 #A/V
 when 6
- @high_e = 1.4 #V 
+ @high_e = 1.35 #V 
  @low_e = 0.0 #V 
  @sensitivity = 1.0e-5 #A/V
 when 7
@@ -66,6 +66,10 @@ when 9
 when 10
  @high_e = 1.0 #V 
  @low_e = -0.4 #V 
+ @sensitivity = 1.0e-4 #A/V
+when 12
+ @high_e = 0.9 #V 
+ @low_e = -0.5 #V 
  @sensitivity = 1.0e-4 #A/V
 else
   raise RuntimeError, 'Invalid pH!'
