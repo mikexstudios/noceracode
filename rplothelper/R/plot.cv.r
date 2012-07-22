@@ -1,6 +1,6 @@
 plot.cv.xlab = ''
 plot.cv.ylab = ''
-plot.cv.setup <- function(xlab = '', ylab = '') {
+plot.cv.setup <- function() {
     #Shift axis labels closer to plot since ticks have been moved in.
     #Must come before the plot command.
     #See: http://www.programmingr.com/content/controlling-margins-and-axes-oma-and-mgp
@@ -17,9 +17,6 @@ plot.cv.setup <- function(xlab = '', ylab = '') {
         cex.lab = 3.0, #make axis annotation larger
         cex.axis = 2.9 #make axis label larger
         )
-    
-    plot.cv.xlab <<- xlab
-    plot.cv.ylab <<- ylab
 }
 
 plot.cv.is_first_plot = TRUE
@@ -44,7 +41,7 @@ plot.cv <- function(...) {
         #Bottom axis
         axis(1, at = axTicks(1), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
              mgp = c(5.6, 1.9, 0))
-        mtext(side = 1, text = plot.cv.xlab
+        mtext(side = 1, text = plot.cv.xlab,
               line = 5.5, cex = 3.0)
         
         minor.tick(nx=2, ny=2, tick.ratio=-2, lwd = 3)
