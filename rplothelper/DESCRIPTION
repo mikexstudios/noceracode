@@ -10,5 +10,5 @@ Maintainer: Michael Huynh <mike.huynh@gmail.com>
 Author: Michael Huynh <mike.huynh@gmail.com>
 Depends: R (>= 2.11.0)
 Suggests: 
-Imports: 
+Imports: shape
 License: GPL

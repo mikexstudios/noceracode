@@ -65,7 +65,34 @@ plot.cv.legend <- function(...) {
     legend(...,
            cex = 1.9,
            lwd = 3, 
-           inset = c(0.03, 0.00),
            seg.len = 3, #longer lines
            bty = 'n')
+}
+
+plot.cv.draw_convention_helper <- function(x, y) {
+    #Draw CV helper arrows. We need the 'shapes' package to specify triangle
+    #arrowhead
+    lwd.old = par(no.readonly = TRUE)$lwd #temporary save
+    par(lwd = 3) #Hack to set lwd of segment
+    Arrows(x, -0.2 + y, #(x, y)
+           x, 0.2 + y,
+           code = 3, #double arrow
+           arr.length = -0.2, #Need to flip arrow around the other way
+           arr.width = 0.3,
+           lwd = 1, #doesn't work to set the segment width, use par instead
+           arr.type = 'triangle')
+    par(lwd = lwd.old) #Hack reset
+    
+    #Draw horizontal line intersecting the double arrow
+    segments(x - 0.03, y,
+             x + 0.03, y,
+             lwd = 2)
+    
+    #Write ic and ia labels
+    text(x - 0.05, 0.15 + y, 
+         label = expression(italic(i)[c]),
+         cex = 1.8)
+    text(x - 0.05, -0.17 + y, 
+         label = expression(italic(i)[a]),
+         cex = 1.8)
 }
