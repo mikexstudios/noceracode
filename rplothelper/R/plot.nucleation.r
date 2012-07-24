@@ -13,7 +13,7 @@ plot.nucleation.setup <- function() {
     par(mar=c(7,8,2,1))
 
     par(
-        lwd = 9, #larger line width
+        lwd = 10, #larger line width
         cex.lab = 3.0, #make axis annotation larger
         cex.axis = 2.9 #make axis label larger
         )
