@@ -20,14 +20,14 @@ plot.tafel.setup <- function() {
 }
 
 plot.tafel.is_first_plot = TRUE
-plot.tafel <- function(...) {
+plot.tafel <- function(..., cex = 5.0) {
     if (plot.tafel.is_first_plot) {
         plot(...,
              axes = FALSE, #we will make our own axes
              ann = FALSE, #we will make our own axes annotation
              type = 'p', #points
              tck = 0, #we will make our own tick marks
-             cex = 5.0 #point size
+             cex = cex #point size
             )
         
         #Setup post-plotting customizations
@@ -59,7 +59,7 @@ plot.tafel <- function(...) {
         plot.tafel.is_first_plot <<- FALSE #need double arrow to overwrite global
     } else {
         points(...,
-               cex = 4.0)
+               cex = cex)
     }
 }
 
