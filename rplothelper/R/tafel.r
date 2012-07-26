@@ -1,6 +1,6 @@
 plot.tafel.xlab = ''
 plot.tafel.ylab = ''
-plot.tafel.setup <- function() {
+plot.tafel.setup <- function(mar=c(7,8,2,1)) {
     #Shift axis labels closer to plot since ticks have been moved in.
     #Must come before the plot command.
     #See: http://www.programmingr.com/content/controlling-margins-and-axes-oma-and-mgp
@@ -10,7 +10,7 @@ plot.tafel.setup <- function() {
     #Add extra margin to the plot since we increased axis label sizes
     #c(bottom, left, top, right)
     #NOTE: We assume that the aspect ratio of the plot is: 9 by 7.
-    par(mar=c(7,8,2,1))
+    par(mar=mar)
 
     par(
         lwd = 7, #line width of points
@@ -69,6 +69,21 @@ plot.tafel.legend <- function(..., lwd = 6, cex = 2.5, seg.len = 3) {
            lwd = lwd, 
            seg.len = seg.len, #longer lines
            bty = 'n')
+}
+
+plot.tafel.add_overpotentials <- function(E_water_ox_standard) {
+    #NOTE: User must override plot.tafel.setup with extra margin on
+    #      the right side of the plot!
+
+    axis(4, at = axTicks(2), 
+         tck = 0.05,
+         lwd = 4,
+         cex.axis = 2.9,
+         mgp = c(5.6, 1.9, 0),
+         label = round((axTicks(2) - E_water_ox_standard) * 1000)) 
+    #Use modded minor.tick to add ticks to right axis.
+    minor.tick(nx=2, ny=2, tick.ratio=-2, side = 4, lwd = 3)
+    mtext(expression(eta ~ "(mV)"), side = 4, line = 5.5, cex = 3.0)
 }
 
 
