@@ -14,7 +14,7 @@
 ## as http://www.gnu.org/copyleft or by writing to the Free Software
 ## Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
-minor.tick <- function(nx=2, ny=2, tick.ratio=.5, ...)
+minor.tick <- function(nx=2, ny=2, tick.ratio=.5, side = FALSE, ...)
 {
   ax <- function(w, n, tick.ratio)
   {
@@ -40,8 +40,11 @@ minor.tick <- function(nx=2, ny=2, tick.ratio=.5, ...)
     #if(.R.)
       #TODO: Implement: https://stat.ethz.ch/pipermail/r-help/2008-July/167434.html
       #If values passed in ... are variables.
-      axis(if(w=="x") 1
-           else 2,
+      if (side == FALSE) {
+        if (w=="x") side = 1
+        else side = 2
+      }
+      axis(side,
            seq(low.minor,hi.minor,by=distance.between.minor),
            labels=FALSE, tcl=par('tcl')*tick.ratio, ...)
     #else
@@ -59,3 +62,4 @@ minor.tick <- function(nx=2, ny=2, tick.ratio=.5, ...)
 
   invisible()
 }
+
