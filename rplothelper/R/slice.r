@@ -20,14 +20,14 @@ plot.slice.setup <- function() {
 }
 
 plot.slice.is_first_plot = TRUE
-plot.slice <- function(...) {
+plot.slice <- function(..., cex = 5.0) {
     if (plot.slice.is_first_plot) {
         plot(...,
              axes = FALSE, #we will make our own axes
              ann = FALSE, #we will make our own axes annotation
              type = 'p', #points
              tck = 0, #we will make our own tick marks
-             cex = 5.0 #point size
+             cex = cex #point size
             )
         
         #Setup post-plotting customizations
@@ -59,7 +59,7 @@ plot.slice <- function(...) {
         plot.slice.is_first_plot <<- FALSE #need double arrow to overwrite global
     } else {
         points(...,
-               cex = 4.0)
+               cex = cex)
     }
 }
 
@@ -76,7 +76,8 @@ plot.slice.legend <- function(..., lwd = 6, cex = 2.0, seg.len = 3) {
 #           throughout the whole plot.
 #clip_extend - defines the extra extension of abline.piece 
 slice.linear_fit <- function(concentration.log, current.log, range = TRUE, 
-                             color = 'black', is_piece = TRUE, clip_extend = 0.05) {
+                             color = 'black', is_piece = TRUE, clip_extend = 0.05,
+                             lwd = 8) {
     if(is.numeric(range)) {
         x = concentration.log[range]
         y = current.log[range]
@@ -89,16 +90,16 @@ slice.linear_fit <- function(concentration.log, current.log, range = TRUE,
     intercept = fit$coefficients['(Intercept)']
     slope = fit$coefficients['x']
 
-    if (is_piece) {
+    if (is_piece && range != TRUE) {
         abline.piece(intercept, slope, 
-               lwd = 8, #larger line width
+               lwd = lwd, #larger line width
                col = color,
                #We then get the from and to values from specified range
                from = concentration.log[head(range, n=1)] - clip_extend,
                to = concentration.log[tail(range, n=1)] + clip_extend)
     } else {
         abline(intercept, slope, 
-               lwd = 8, #larger line width
+               lwd = lwd, #larger line width
                col = color)
     }
 
@@ -143,4 +144,67 @@ slice.hslice_tafels <- function(filenames, concentrations, potential) {
     }
 
     return(result)
+}
+
+
+slice.surface_area = NULL #need to set this for vslice_tafel
+slice.vslice_tafels <- function(filenames, pHs, logcurrent, low_fit_ranges) {
+    result = data.frame()
+
+    #For each file, iterate through it
+    for(i in 1:length(filenames)) {
+        filename = filenames[i]
+        pH = pHs[i]
+        low_fit_range = low_fit_ranges[i]
+        low_fit_range = as.numeric(strsplit(low_fit_range, ':')[[1]][1]):as.numeric(strsplit(low_fit_range, ':')[[1]][2])
+
+        #Open each file as CSV, headers are included
+        tafel = read.csv(file = filename, header = TRUE)
+        #Normalize the current to 1cm^2
+        tafel$iac_norm = tafel$iac / slice.surface_area
+        #Take log of current
+        tafel$iac.log = log10(tafel$iac_norm)
+
+
+        #Get the potential for a given logcurrent. We estimate
+        #this value from the linear fit line.
+        summ = slice.calc_linear_fit_tafel(tafel, range = low_fit_range)
+        #y = m*x + b
+        potential = summ$slope * logcurrent + summ$intercept
+
+        #Make a new data frame with relevant information
+        df = data.frame(pH = pH,
+                        potential = potential)
+
+        #Add row to our data frame
+        result = rbind(result, df)
+    }
+
+    return(result)
+}
+
+slice.calc_linear_fit_tafel <- function(tafel, range = TRUE) {
+    #NOTE: iac.log has already been normalized!
+    if(is.numeric(range)) {
+        x = tafel$iac.log[range]
+        y = tafel$potential[range]
+    } else {
+        x = tafel$iac.log
+        y = tafel$potential
+    }
+
+    fit = lm(y ~ x)
+    intercept = fit$coefficients['(Intercept)']
+    slope = fit$coefficients['x']
+
+    #Get coefficients and R^2 values
+    summ = summary(fit)
+    coefficients = summ['coefficients'][[1]]
+    slope.stdev = coefficients['x', 'Std. Error']
+    rsq = summ['r.squared'][[1]]
+    summ = data.frame(slope = slope,
+                      slope.stdev = slope.stdev,
+                      intercept = intercept,
+                      rsq = rsq * 100)
+    return(summ)
 }
