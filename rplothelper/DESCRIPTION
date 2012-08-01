@@ -1,0 +1,14 @@
+Package: rplothelper
+Title: Helper functions for plotting scientific data for Nocera group.
+Description: rplothelper contains custom functions that help modify
+    the base plotting system for my personal scientific plotting style
+    used for Nocera group publications, specifically for plotting
+    electrochemical data.
+URL: http://github.com/mikexstudios/noceracode/
+Version: 1.0
+Maintainer: Michael Huynh <mike.huynh@gmail.com>
+Author: Michael Huynh <mike.huynh@gmail.com>
+Depends: R (>= 2.11.0)
+Suggests: 
+Imports: shape
+License: GPL

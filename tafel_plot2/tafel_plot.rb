@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'rubygems'
 require 'rsruby'
 #require 'ruby-debug'
@@ -20,6 +21,8 @@ class TafelPlot
     @y_label = 'E / V (vs Ag/AgCl)'
     @color = 'black'
     @symbol = 1 #see http://sphaerula.com/legacy/R/plotSymbols.html 
+    @lwd = 3
+    @type = 'b'
     @fit_color = 'red'
     #If set to true, the fit color will match the plot color.
     @fit_match_color = false
@@ -51,6 +54,7 @@ class TafelPlot
   # If draw is false, then line will not be plotted, but fitting parameters
   # will be shown.
   def linear_fit(range = nil, draw = true)
+    #return
     raise "Need to call 'draw' first before fitting!" if not defined? @x
 
     #If range is specified process it.
@@ -80,7 +84,10 @@ class TafelPlot
     #need to mirror that by attaching a hash at the end.
     if draw
       @r.abline(coefficients[:intercept], coefficients[:slope], 
-                { :col => @fit_match_color ? @color : @fit_color  })
+                { 
+                  :col => @fit_match_color ? @color : @fit_color,
+                  :lwd => @lwd - 1,
+                })
     end
 
     #Also print formatted output of coefficients and R^2 values
@@ -137,7 +144,28 @@ class TafelPlot
     #If this is our second plot, we need to add the points using `points` and
     #not plot.
     if not @already_drawn
+      @r.par(:mar => [4,4,4,4])
+
       @r.plot(@x, @y, plot_arguments)
+
+      @r.box(:lwd => @lwd - 1)
+
+      #@r.axis(4, {
+      #  :at => @r.axTicks(2), 
+      #  #:lwd => @lwd,
+      #  #:label => @r.axTicks(2) - 0.6,
+      #  #:label => @r.eval_R("@r.axTicks(2) - 0.6"),
+      #})
+      #@r.eval_R("axis(4, at = axTicks(2), label = axTicks(2) - 0.489)")
+      #@r.eval_R("axis(4, at = axTicks(2), label = axTicks(2) - 0.62)")
+      @r.eval_R("axis(4, at = axTicks(2), label = axTicks(2) - 0.856)")
+
+      @r.mtext("overpotential (V)", {
+      #@r.mtext(, {
+        :side => 4, 
+        :line => 2,
+      })
+
       @already_drawn = true
     else
       @r.points(@x, @y, plot_arguments)
@@ -154,7 +182,8 @@ class TafelPlot
     @r.legend(position, {
       :legend => @legend_entries.keys,
       :col => @legend_entries.values,
-      :lty => 1
+      :lty => 1,
+      :lwd => @lwd,
     }) #line type
   end
 
@@ -167,6 +196,8 @@ class TafelPlot
   def output=(filename)
     @output = filename
     #Open up new file for plotting
+    #@r.cairo_pdf(@output)
+    #@r.eval_R("cairo_pdf('#{filename}')")
     @r.pdf(@output)
   end
 
@@ -195,6 +226,8 @@ class TafelPlot
     end
     args[:col] = @color
     args[:pch] = @symbol
+    args[:lwd] = @lwd
+    args[:type] = @type
 
     return args
   end
