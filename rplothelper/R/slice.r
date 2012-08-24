@@ -117,7 +117,9 @@ slice.linear_fit <- function(concentration.log, current.log, range = TRUE,
 }
 
 
-slice.hslice_tafels <- function(filenames, concentrations, potential) {
+slice.hslice_tafels <- function(filenames, concentrations, potential,
+                                current_colname = 'iac', 
+                                potential_colname = 'potential') {
     result = data.frame()
     #There seems to be a bug in R in that the potential, seemingly
     #randomly, loses precision or something. So this is a crude fix:
@@ -132,12 +134,12 @@ slice.hslice_tafels <- function(filenames, concentrations, potential) {
         tafel = read.csv(file = filename, header = TRUE)
 
         #Get the current for given potential
-        row = tafel[tafel$potential == potential, ]
+        row = tafel[tafel[[potential_colname]] == potential, ]
         if(nrow(row) != 1) next
 
         #Make a new data frame with relevant information
         df = data.frame(concentration = concentration,
-                        current = row$iac)
+                        current = row[[current_colname]])
 
         #Add row to our data frame
         result = rbind(result, df)
@@ -148,7 +150,8 @@ slice.hslice_tafels <- function(filenames, concentrations, potential) {
 
 
 slice.surface_area = NULL #need to set this for vslice_tafel
-slice.vslice_tafels <- function(filenames, pHs, logcurrent, low_fit_ranges) {
+slice.vslice_tafels <- function(filenames, pHs, logcurrent, low_fit_ranges,
+                                current_colname = 'iac') { 
     result = data.frame()
 
     #For each file, iterate through it
@@ -161,7 +164,7 @@ slice.vslice_tafels <- function(filenames, pHs, logcurrent, low_fit_ranges) {
         #Open each file as CSV, headers are included
         tafel = read.csv(file = filename, header = TRUE)
         #Normalize the current to 1cm^2
-        tafel$iac_norm = tafel$iac / slice.surface_area
+        tafel$iac_norm = tafel[[current_colname]] / slice.surface_area
         #Take log of current
         tafel$iac.log = log10(tafel$iac_norm)
 
