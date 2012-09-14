@@ -211,3 +211,29 @@ slice.calc_linear_fit_tafel <- function(tafel, range = TRUE) {
                       rsq = rsq * 100)
     return(summ)
 }
+
+#Given serialized fit tafel lines, vertically slice them
+slice.vslice_tafel_lines <- function(filenames, pHs, logcurrent) {
+    result = data.frame()
+
+    #For each file, iterate through it
+    for(i in 1:length(filenames)) {
+        filename = filenames[i]
+        pH = pHs[i]
+
+        #Get the potential for a given logcurrent. We estimate
+        #this value from the linear fit line.
+        summ = readRDS(filename)
+        #y = m*x + b
+        potential = summ$slope * logcurrent + summ$intercept
+
+        #Make a new data frame with relevant information
+        df = data.frame(pH = pH,
+                        potential = potential)
+
+        #Add row to our data frame
+        result = rbind(result, df)
+    }
+
+    return(result)
+}
