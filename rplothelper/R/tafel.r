@@ -108,7 +108,9 @@ plot.tafel.add_overpotentials <- function(E_water_ox_standard) {
 
 
 
-tafel.linear_fit <- function(iac.log, potential, range = TRUE, color = 'black')
+#Set intercept shift if you want to shift the fit line up or down.
+tafel.linear_fit <- function(iac.log, potential, range = TRUE, color = 'black',
+                             intercept_shift = 0)
 {
     if(is.numeric(range)) {
         x = iac.log[range]
@@ -119,7 +121,7 @@ tafel.linear_fit <- function(iac.log, potential, range = TRUE, color = 'black')
     }
 
     fit = lm(y ~ x)
-    intercept = fit$coefficients['(Intercept)']
+    intercept = fit$coefficients['(Intercept)'] + intercept_shift
     slope = fit$coefficients['x']
 
     abline(intercept, slope, 
