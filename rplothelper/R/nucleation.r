@@ -66,3 +66,32 @@ nucleation.average_plots <- function(all_ait) {
 
     return(averaged)
 }
+
+
+nucleation.linear_fit <- function(x, y, range = TRUE, color = 'black',
+                             intercept_shift = 0, lwd = 5) {
+    if(is.numeric(range)) {
+        x = x[range]
+        y = y[range]
+    } 
+
+    fit = lm(y ~ x)
+    intercept = fit$coefficients['(Intercept)'] + intercept_shift
+    slope = fit$coefficients['x']
+
+    abline(intercept, slope, 
+           lwd = lwd, #larger line width
+           col = color)
+
+    #Get coefficients and R^2 values
+    summ = summary(fit)
+    coefficients = summ['coefficients'][[1]]
+    slope.stdev = coefficients['x', 'Std. Error']
+    rsq = summ['r.squared'][[1]]
+
+    summ = data.frame(slope = slope,
+                      slope.stdev = slope.stdev,
+                      intercept = intercept,
+                      rsq = rsq * 100)
+    return(summ)
+}

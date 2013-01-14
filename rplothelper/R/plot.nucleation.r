@@ -10,7 +10,7 @@ plot.nucleation.setup <- function() {
     #Add extra margin to the plot since we increased axis label sizes
     #c(bottom, left, top, right)
     #NOTE: We assume that the aspect ratio of the plot is: 9 by 7.
-    par(mar=c(7,8,2,1))
+    par(mar=c(7,9,2,1))
 
     par(
         lwd = 10, #larger line width
@@ -34,9 +34,10 @@ plot.nucleation <- function(...) {
 
         #Left axis, inner tick mark with tck, thicker line with lwd.
         #axis(2, at = axTicks(2), label = FALSE, lwd = 4, tck = 0.05)
-        axis(2, at = axTicks(2), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9)
+        axis(2, at = axTicks(2), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9, 
+             las = 1) #make y-axis labels horizontal
         mtext(side = 2, text = plot.nucleation.ylab,
-              line = 3.5, cex = 3.0)
+              line = 5.0, cex = 3.0, las = 0) #make y-axis labels parallel again
         
         #Bottom axis
         axis(1, at = axTicks(1), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
@@ -61,11 +62,11 @@ plot.nucleation <- function(...) {
     }
 }
 
-plot.nucleation.legend <- function(..., lwd = 6) {
+plot.nucleation.legend <- function(..., cex = 1.9, lwd = 6, seg.len = 5) {
     legend(...,
-           cex = 1.9,
+           cex = cex,
            lwd = lwd, 
-           seg.len = 5, #longer lines
+           seg.len = seg.len, #longer lines
            bty = 'n')
 }
 

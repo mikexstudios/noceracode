@@ -74,7 +74,7 @@ plot.kl.legend <- function(..., lwd = 6) {
 
 
 kl.linear_fit <- function(angular_velocity.isq, current.inverse, range = TRUE, 
-                          color = 'black', current_rescale_factor = 1) {
+                          color = 'black', current_rescale_factor = 1, lwd = 6) {
     if(is.numeric(range)) {
         y = current.inverse[range]
         x = angular_velocity.isq[range]
@@ -88,7 +88,7 @@ kl.linear_fit <- function(angular_velocity.isq, current.inverse, range = TRUE,
     slope = fit$coefficients['x']
 
     abline(intercept, slope, 
-           lwd = 6, #larger line width
+           lwd = lwd, #larger line width
            col = color)
 
     #Get coefficients and R^2 values
