@@ -1,0 +1,18 @@
+Ideal macro generation system
+=============================
+
+1. ./[name of specific generator] (just run it)
+2. Edit the generator file for specifics.
+
+
+Notes on .mcr generation
+========================
+
+1. Use windows-style line endings: \0d\0a is \r\n
+2. The first 4 bytes are a unsigned 32-bit integeter in little endian format
+   specifying the total number of subsequent bytes to read.
+   ex. blank file -> 0x00000000
+       'A'        -> 0x01000000
+       3200 bytes -> 0x800C0000  (which is 0x0C80 -> 3200 bytes in hex)
+   Use ruby's Array(3200).pack('V') (where V denotes little-endian) to generate
+   the correct hex output.
