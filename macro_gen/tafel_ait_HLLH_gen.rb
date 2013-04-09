@@ -1,9 +1,12 @@
 #!/usr/bin/env ruby
+# Variation on tafel_ait_gen.rb where passes run from H->L potential and then
+# L -> H potential.
 
 # Experiment variables
 
 @potential_range = (1.20..0.80) #V, also controls direction of scan
 @step = (@potential_range.last - @potential_range.first) / 12.0 
+@even_pass_reverse_direction = true #on even passes, reverse scan direction
 #@sample_time = 300 #sec, of each point
 @sample_time = lambda do |p|
   t = 10 #normal run time in s
@@ -87,7 +90,6 @@ File.open('%s.temp' % @output_mcr, 'w') do |f|
     #end values of our range.
     potentials = (@potential_range.first).step(@potential_range.last, @step)
     potentials = potentials.to_a.map {|x| x.round(3)}
-    potentials.reverse! if @even_pass_reverse_direction and pass.even?
     potentials.each_with_index do |p, i|
       f.puts 'ei = %g' % p
       #Dynamic time and sensitivity
