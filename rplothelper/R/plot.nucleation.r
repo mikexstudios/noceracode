@@ -13,14 +13,14 @@ plot.nucleation.setup <- function() {
     par(mar=c(7,9,2,1))
 
     par(
-        lwd = 10, #larger line width
+        lwd = 7, #intermediate line width
         cex.lab = 3.0, #make axis annotation larger
         cex.axis = 2.9 #make axis label larger
         )
 }
 
 plot.nucleation.is_first_plot = TRUE
-plot.nucleation <- function(...) {
+plot.nucleation <- function(..., y_label_line = 5.0) {
     if (plot.nucleation.is_first_plot) {
         plot(...,
              axes = FALSE, #we will make our own axes
@@ -37,7 +37,7 @@ plot.nucleation <- function(...) {
         axis(2, at = axTicks(2), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9, 
              las = 1) #make y-axis labels horizontal
         mtext(side = 2, text = plot.nucleation.ylab,
-              line = 5.0, cex = 3.0, las = 0) #make y-axis labels parallel again
+              line = y_label_line, cex = 3.0, las = 0) #make y-axis labels parallel again
         
         #Bottom axis
         axis(1, at = axTicks(1), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,

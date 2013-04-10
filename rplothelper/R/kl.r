@@ -1,6 +1,6 @@
 plot.kl.xlab = ''
 plot.kl.ylab = ''
-plot.kl.setup <- function() {
+plot.kl.setup <- function(mar=c(7,8,2,1)) {
     #Shift axis labels closer to plot since ticks have been moved in.
     #Must come before the plot command.
     #See: http://www.programmingr.com/content/controlling-margins-and-axes-oma-and-mgp
@@ -10,7 +10,7 @@ plot.kl.setup <- function() {
     #Add extra margin to the plot since we increased axis label sizes
     #c(bottom, left, top, right)
     #NOTE: We assume that the aspect ratio of the plot is: 9 by 7.
-    par(mar=c(7,8,2,1))
+    par(mar=mar)
 
     par(
         lwd = 5, #line width of points
@@ -20,14 +20,14 @@ plot.kl.setup <- function() {
 }
 
 plot.kl.is_first_plot = TRUE
-plot.kl <- function(...) {
+plot.kl <- function(..., cex = 3.5, type = 'p', y_label_line = 5.0) {
     if (plot.kl.is_first_plot) {
         plot(...,
              axes = FALSE, #we will make our own axes
              ann = FALSE, #we will make our own axes annotation
-             type = 'p', #points
+             type = type, #points
              tck = 0, #we will make our own tick marks
-             cex = 3.5 #point size
+             cex = cex #point size
             )
         
         #Setup post-plotting customizations
@@ -35,9 +35,10 @@ plot.kl <- function(...) {
 
         #Left axis, inner tick mark with tck, thicker line with lwd.
         #axis(2, at = axTicks(2), label = FALSE, lwd = 4, tck = 0.05)
-        axis(2, at = axTicks(2), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9)
+        axis(2, at = axTicks(2), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
+                las = 1) #make y-axis labels horizontal
         mtext(side = 2, text = plot.kl.ylab,
-              line = 3.5, cex = 3.0)
+              line = y_label_line, cex = 3.0, las = 0) #make y-axis labels parallel again
         
         #Bottom axis
         axis(1, at = axTicks(1), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
@@ -59,7 +60,7 @@ plot.kl <- function(...) {
         plot.kl.is_first_plot <<- FALSE #need double arrow to overwrite global
     } else {
         points(...,
-               cex = 3.5)
+               cex = cex)
     }
 }
 
@@ -74,7 +75,7 @@ plot.kl.legend <- function(..., lwd = 6) {
 
 
 kl.linear_fit <- function(angular_velocity.isq, current.inverse, range = TRUE, 
-                          color = 'black', current_rescale_factor = 1, lwd = 6) {
+                          color = 'black', current_rescale_factor = 1, lwd = 4) {
     if(is.numeric(range)) {
         y = current.inverse[range]
         x = angular_velocity.isq[range]
