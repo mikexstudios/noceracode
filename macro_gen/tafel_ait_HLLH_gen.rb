@@ -23,7 +23,7 @@ end
   return s
 end
 @sample_interval = 1 #sec between each point sample
-@num_passes = 1
+@num_passes = 4
 @ir_comp = 16 #ohm
 #Save filename in sprintf format. Leave out .bin/.txt.
 #<pass> -> denotes the pass number
@@ -90,6 +90,7 @@ File.open('%s.temp' % @output_mcr, 'w') do |f|
     #end values of our range.
     potentials = (@potential_range.first).step(@potential_range.last, @step)
     potentials = potentials.to_a.map {|x| x.round(3)}
+    potentials.reverse! if @even_pass_reverse_direction and pass.even?
     potentials.each_with_index do |p, i|
       f.puts 'ei = %g' % p
       #Dynamic time and sensitivity
