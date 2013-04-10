@@ -1,9 +1,12 @@
 #!/usr/bin/env ruby
+# Variation on tafel_ait_gen.rb where passes run from H->L potential and then
+# L -> H potential.
 
 # Experiment variables
 
 @potential_range = (1.20..0.80) #V, also controls direction of scan
 @step = (@potential_range.last - @potential_range.first) / 12.0 
+@even_pass_reverse_direction = true #on even passes, reverse scan direction
 #@sample_time = 300 #sec, of each point
 @sample_time = lambda do |p|
   t = 10 #normal run time in s
@@ -20,7 +23,7 @@ end
   return s
 end
 @sample_interval = 1 #sec between each point sample
-@num_passes = 1
+@num_passes = 4
 @ir_comp = 16 #ohm
 #Save filename in sprintf format. Leave out .bin/.txt.
 #<pass> -> denotes the pass number
