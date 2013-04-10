@@ -92,8 +92,10 @@ end
 
 
 # Calculate number of characters. Read the generated file, calculate the number
-# of characters in the macro and prepend it.
-File.open('%s.temp' % @output_mcr) do |ftemp|
+# of characters in the macro and prepend it. NOTE: Need to open the file in
+# binary format to preserve the line endings exactly because in windows, ruby
+# converts the \r\n to single \n when read through File.
+File.open('%s.temp' % @output_mcr, 'rb') do |ftemp|
   s = ftemp.read()
 
   File.open(@output_mcr, 'w') do |f|
