@@ -1,6 +1,6 @@
 plot.slice.xlab = ''
 plot.slice.ylab = ''
-plot.slice.setup <- function() {
+plot.slice.setup <- function(mar=c(7,8,2,1)) {
     #Shift axis labels closer to plot since ticks have been moved in.
     #Must come before the plot command.
     #See: http://www.programmingr.com/content/controlling-margins-and-axes-oma-and-mgp
@@ -10,7 +10,7 @@ plot.slice.setup <- function() {
     #Add extra margin to the plot since we increased axis label sizes
     #c(bottom, left, top, right)
     #NOTE: We assume that the aspect ratio of the plot is: 9 by 7.
-    par(mar=c(7,8,2,1))
+    par(mar = mar)
 
     par(
         lwd = 7, #line width of points
@@ -20,12 +20,12 @@ plot.slice.setup <- function() {
 }
 
 plot.slice.is_first_plot = TRUE
-plot.slice <- function(..., cex = 5.0) {
+plot.slice <- function(..., cex = 3.5, type = 'p', y_label_line = 5.0) {
     if (plot.slice.is_first_plot) {
         plot(...,
              axes = FALSE, #we will make our own axes
              ann = FALSE, #we will make our own axes annotation
-             type = 'p', #points
+             type = type, #points
              tck = 0, #we will make our own tick marks
              cex = cex #point size
             )
@@ -35,9 +35,10 @@ plot.slice <- function(..., cex = 5.0) {
 
         #Left axis, inner tick mark with tck, thicker line with lwd.
         #axis(2, at = axTicks(2), label = FALSE, lwd = 4, tck = 0.05)
-        axis(2, at = axTicks(2), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9)
+        axis(2, at = axTicks(2), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
+                las = 1) #make y-axis labels horizontal
         mtext(side = 2, text = plot.slice.ylab,
-              line = 3.5, cex = 3.0)
+              line = y_label_line, cex = 3.0, las = 0) #make y-axis labels parallel again
         
         #Bottom axis
         axis(1, at = axTicks(1), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
@@ -77,7 +78,7 @@ plot.slice.legend <- function(..., lwd = 6, cex = 2.0, seg.len = 3) {
 #clip_extend - defines the extra extension of abline.piece 
 slice.linear_fit <- function(concentration.log, current.log, range = TRUE, 
                              color = 'black', is_piece = TRUE, clip_extend = 0.05,
-                             lwd = 8) {
+                             lwd = 4, intercept_shift = 0) {
     if(is.numeric(range)) {
         x = concentration.log[range]
         y = current.log[range]
@@ -87,10 +88,10 @@ slice.linear_fit <- function(concentration.log, current.log, range = TRUE,
     }
 
     fit = lm(y ~ x)
-    intercept = fit$coefficients['(Intercept)']
+    intercept = fit$coefficients['(Intercept)'] + intercept_shift
     slope = fit$coefficients['x']
 
-    if (is_piece && range != TRUE) {
+    if (is_piece && !isTRUE(range)) {
         abline.piece(intercept, slope, 
                lwd = lwd, #larger line width
                col = color,

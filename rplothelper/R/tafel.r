@@ -20,12 +20,14 @@ plot.tafel.setup <- function(mar=c(7,8,2,1)) {
 }
 
 plot.tafel.is_first_plot = TRUE
-plot.tafel <- function(..., cex = 5.0) {
+plot.tafel <- function(..., cex = 4.5, type = 'p', is_y_labels = TRUE, 
+                       is_y_ticks = TRUE, is_minor_ticks = TRUE, 
+                       y_label_line = 5.0, is_x_labels = TRUE, is_x_ticks = TRUE) {
     if (plot.tafel.is_first_plot) {
         plot(...,
              axes = FALSE, #we will make our own axes
              ann = FALSE, #we will make our own axes annotation
-             type = 'p', #points
+             type = type, #points
              tck = 0, #we will make our own tick marks
              cex = cex #point size
             )
@@ -33,19 +35,32 @@ plot.tafel <- function(..., cex = 5.0) {
         #Setup post-plotting customizations
         box(lwd = 4)
 
-        #Left axis, inner tick mark with tck, thicker line with lwd.
-        #axis(2, at = axTicks(2), label = FALSE, lwd = 4, tck = 0.05)
-        axis(2, at = axTicks(2), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9)
-        mtext(side = 2, text = plot.tafel.ylab,
-              line = 3.5, cex = 3.0)
+        if (is_y_labels) {
+            #Left axis, inner tick mark with tck, thicker line with lwd.
+            #axis(2, at = axTicks(2), label = FALSE, lwd = 4, tck = 0.05)
+            axis(2, at = axTicks(2), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
+                 las = 1) #make y-axis labels horizontal
+            mtext(side = 2, text = plot.tafel.ylab,
+                  line = y_label_line, cex = 3.0, las = 0) #make y-axis labels parallel again
+        } else if (is_y_ticks) {
+            axis(2, at = axTicks(2), label = FALSE, lwd = 4, tck = 0.05, cex.axis = 2.9,
+                 las = 1) #make y-axis labels horizontal
+        }
         
         #Bottom axis
-        axis(1, at = axTicks(1), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
-             mgp = c(5.6, 1.9, 0))
-        mtext(side = 1, text = plot.tafel.xlab,
-              line = 5.5, cex = 3.0)
-        
-        minor.tick(nx=2, ny=2, tick.ratio=-2, lwd = 3)
+        if (is_x_labels) {
+            axis(1, at = axTicks(1), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
+                 mgp = c(5.6, 1.9, 0))
+            mtext(side = 1, text = plot.tafel.xlab,
+                  line = 5.5, cex = 3.0)
+        } else if (is_x_ticks) {
+            axis(1, at = axTicks(1), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
+                 mgp = c(5.6, 1.9, 0))
+        }
+            
+        if (is_minor_ticks) {
+            minor.tick(nx=2, ny=2, tick.ratio=-2, lwd = 3)
+        }
 
         #Add another axis at the bottom for NHE
         #axis(1, at = axTicks(1), 
@@ -59,6 +74,7 @@ plot.tafel <- function(..., cex = 5.0) {
         plot.tafel.is_first_plot <<- FALSE #need double arrow to overwrite global
     } else {
         points(...,
+               type = type,
                cex = cex)
     }
 }
@@ -78,12 +94,14 @@ plot.tafel.add_overpotentials <- function(E_water_ox_standard) {
          tck = 0.05,
          lwd = 4,
          cex.axis = 2.9,
-         mgp = c(5.6, 1.9, 0),
-         label = round((axTicks(2) - E_water_ox_standard) * 1000)) 
+         mgp = c(5.6, 1.1, 0),
+         label = round((axTicks(2) - E_water_ox_standard) * 1000), 
+         las = 1) #make y-axis labels horizontal
     #Use modded minor.tick to add ticks to right axis.
     minor.tick(nx=2, ny=2, tick.ratio=-2, side = 4, lwd = 3)
 
-    mtext(expression(eta ~ "(mV)"), side = 4, line = 5.3, cex = 3.0)
+    mtext(expression(eta ~ "/ mV"), side = 4, line = 7.8, cex = 3.0,
+          las = 0) #make label vertical again
     
     #The problem with mtext is that we can't rotate that label. Thus,
     #manually calculate the position of the mtext
@@ -110,7 +128,7 @@ plot.tafel.add_overpotentials <- function(E_water_ox_standard) {
 
 #Set intercept shift if you want to shift the fit line up or down.
 tafel.linear_fit <- function(iac.log, potential, range = TRUE, color = 'black',
-                             intercept_shift = 0)
+                             intercept_shift = 0, lwd = 5)
 {
     if(is.numeric(range)) {
         x = iac.log[range]
@@ -125,7 +143,7 @@ tafel.linear_fit <- function(iac.log, potential, range = TRUE, color = 'black',
     slope = fit$coefficients['x']
 
     abline(intercept, slope, 
-           lwd = 8, #larger line width
+           lwd = lwd, #larger line width
            col = color)
 
     #Get coefficients and R^2 values
