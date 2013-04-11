@@ -28,7 +28,7 @@ class AutoItX3::Window
 end
 
 class EchemSoftware
-  attr_accessor :folder #sets the save folder in macro
+  attr_accessor :macro
 
   def initialize
     $log.debug 'Initializing echem program...'
@@ -192,6 +192,11 @@ class EchemSoftware
     @macro += "tsave = %s\n" % filename
   end
 
+  def setup_charge_abort(charge)
+    $log.debug 'Setting experiment abort when charge greater than: %g' % charge
+    @macro += "abortq = %g\n" % charge
+  end
+
   def setup_manual_ir_compensation(resistance)
     $log.debug 'Setting manual iR compensation: %g' % resistance
 
@@ -226,6 +231,19 @@ class EchemSoftware
     AutoItX3.send_keys('!fc') #file -> close
   end
 
+  def get_open_circuit_potential
+    $log.debug 'Getting open circuit potential...'
+    @main_window.activate #sets focus to window
+
+    AutoItX3.send_keys('!co') #open up the control -> Open Circuit Potential window
+    AutoItX3::Window.wait('Open Circuit Potential Measurement')
+
+    ocp_control = AutoItX3::Control.new('Open Circuit Potential Measurement', '', 'Edit1')
+    ocp = ocp_control.text.to_f
+
+    AutoItX3.send_keys('{ENTER}') #OK button
+    return ocp
+  end
 
   # Use this method to determine the IR compensation needed for setting
   # manual IR compensation.
