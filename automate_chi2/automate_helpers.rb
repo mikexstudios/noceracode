@@ -16,6 +16,8 @@ def run_ait
     @status_check_interval = (@sample_time.call(@init_e) + 5) / 2 #sec
     @status_max_runtime = @sample_time.call(@init_e) + 10 #sec
     es.run(@status_check_interval, @status_max_runtime)
+
+    @save_filename  = @save_filename_format % {pass: pass, run: i+1}
     es.save_as(@save_filename)
   rescue RuntimeError
     $log.error 'RuntimeError: Retrying experiment...'

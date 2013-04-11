@@ -30,10 +30,7 @@ end
 #<run>  -> denotes the run number
 @save_filename_format = 'ait_p%02<pass>i_%02<run>i' #e.g. ait_p01_02
 
-
-# Internal variables and routines (do not change)
-@save_folder = Dir.pwd #set to current working directory
-
+#
 #We run from high potential to low potential
 for pass in 1..@num_passes
   #Since we can't have negative step values (ie. for when we decrement), 
@@ -45,8 +42,6 @@ for pass in 1..@num_passes
 
   potentials.each_with_index do |p, i|
     @init_e = p
-    @save_filename  = @save_filename_format % {pass: pass, run: i+1}
-
     run_ait
   end
 end
