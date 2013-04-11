@@ -226,6 +226,78 @@ class EchemSoftware
     AutoItX3.send_keys('!fc') #file -> close
   end
 
+
+  # Use this method to determine the IR compensation needed for setting
+  # manual IR compensation.
+  def automatic_ir_compensation(params)
+    $log.debug 'Setting and testing automatic iR compensation...'
+    params = { :test_e => 0.0, 
+               :overshoot => 2, 
+               :step_amplitude => 0.05,
+               :comp_level => 100,
+             }.merge(params)
+    $log.info params
+
+    @main_window.activate #sets focus to window
+    AutoItX3.send_keys('!ci') #open up the control -> iR Compensation window
+    AutoItX3::Window.wait('iR Compensation')
+
+    AutoItX3.send_keys('!w') #Always enable iR Comp
+    AutoItX3.send_keys('!A') #Set iR Comp Mode to Automatic
+    AutoItX3.send_keys('!i') #Check iR Compensation for Next Run box
+
+    AutoItX3.send_keys('!E') #Test E (V)
+    AutoItX3.send_keys(test_e.to_s)
+    AutoItX3.send_keys('!S') #Step Amplitude (V)
+    AutoItX3.send_keys(step_amplitude.to_s)
+    AutoItX3.send_keys('!L') #Comp Level (%)
+    AutoItX3.send_keys(comp_level.to_s)
+    AutoItX3.send_keys('!v') #Overshoot (%)
+    AutoItX3.send_keys(overshoot.to_s)
+
+    AutoItX3.send_keys('!T') #Test button
+
+    tries = 0
+    begin
+      #Now we have to wait until values appear in the iR Comp Test Results area.
+      sleep(18) #sec
+      #TODO: Have a retry loop checking for the iR comp values to appear
+  
+      #Now extract the values
+      resistance_control = AutoItX3::Control.new('iR Compensation', '', 'Edit1')
+      rc_constant_control = AutoItX3::Control.new('iR Compensation', '', 'Edit2')
+      comp_level_control = AutoItX3::Control.new('iR Compensation', '', 'Edit3')
+      uncomp_r_control = AutoItX3::Control.new('iR Compensation', '', 'Edit4')
+
+      if resistance_control.text.strip.empty? and rc_constant_control.text.strip.empty?
+        $log.error 'iR Comp Test Results are empty!'
+        raise RuntimeError, 'iR Comp Test Results are empty!'
+      end
+    rescue RuntimeError
+      tries += 1
+      $log.info 'Retrying reading iR Comp Test Results...'
+      retry if tries < 2
+      #This RuntimeError should be caught by the running script (eg. it should
+      #then kill the program and restart on this point).
+      $log.error 'iR Comp Test Results are empty despite retries!'
+      raise RuntimeError, 'iR Comp Test Results are empty despite retries!'
+    end
+
+    resistance = resistance_control.text.to_f
+    rc_constant = rc_constant_control.text.to_f
+    comp_level = comp_level_control.text.to_f
+    uncomp_r = uncomp_r_control.text.to_f
+
+    AutoItX3.send_keys('{ENTER}') #OK button to exit box
+
+    comp_output =  {'resistance' => resistance, 
+            'rc_constant' => rc_constant,
+            'comp_level' => comp_level,
+            'uncomp_r' => uncomp_r}
+    $log.info comp_output
+    return comp_output
+  end
+
 end
 
 require 'automate_helpers.rb'
