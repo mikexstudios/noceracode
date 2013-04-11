@@ -31,12 +31,17 @@ class EchemSoftware
   def initialize
     $log.debug 'Initializing echem program...'
     #AutoItX3.block_input = true
-    
+
     #Check if another instance of the software is running. If so, we cannot start
     #ours.
-    raise LoadError, 'Software already running!' if AutoItX3::Window.exists?('Electrochemical')
+    begin
+      raise LoadError, 'Software already running!' if AutoItX3::Window.exists?('Electrochemical')
+    rescue Win32::API::LoadLibraryError
+      raise LoadError, 'AutoItX3.dll does not exist!'
+    end
 
     @main_pid = AutoItX3.run('chi760d.exe')
+    raise LoadError, 'CHI Software not found in same directory!' if @main_pid.nil?
     #Set title matching criterion looser: 2 = Match any substring in the title.
     AutoItX3.set_option('WinTitleMatchMode', 2)
     
@@ -480,3 +485,5 @@ class EchemSoftware
 end
 
 #TODO: Create new expt (file -> new) and expand window again.
+
+require './automate_helpers.rb'

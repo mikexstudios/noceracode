@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #Must include logging information before requiring automate_chi
-$log_file = File.new('C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\09-10-2012\06tafel\rotator.log', 'w')
+$log_file = File.new('C:\Users\Nocera Group\Dropbox\Electrochemistry\Mike\04-11-2013\01tafel\rotator.log', 'w')
 #$log_file.sync = true #do not buffer (doesn't actually work)
 require './automate_chi.rb'
 
