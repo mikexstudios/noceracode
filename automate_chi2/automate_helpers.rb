@@ -39,3 +39,42 @@ def run_ait
   $log_file.flush #since .sync doesn't work for some reason
   print '.'
 end
+
+def run_ait_macro
+  begin
+    $log.info 'tafel_ait: %s' % @save_filename
+    es = EchemSoftware.new
+    es.setup_save_folder(@save_path)
+    es.setup_manual_ir_compensation(@ir_comp)
+    es.setup_amperometric_it_curve(:init_e => @init_e, 
+      :sample_interval => @sample_interval, 
+      :run_time => @sample_time.call(@init_e), 
+      :quiet_time => 0,
+      :sensitivity => @sensitivity.call(@init_e)) 
+    es.setup_save_filename(@save_filename)
+	
+    #When our runtime exceeds the maximum runtime given below, we assume the experi
+    #has crashed and exit from loop.
+    @status_check_interval = (@sample_time.call(@init_e) + 5) / 2 #sec
+    @status_max_runtime = @sample_time.call(@init_e) + 10 #sec
+    es.execute_macro(@status_check_interval, @status_max_runtime)
+  rescue RuntimeError
+    $log.error 'RuntimeError: Retrying experiment...'
+    $log.info 'Killing program and sleeping for a bit...'
+    #Getting here means that the software has crashed. So let's try to restart
+    #it again.
+    es.kill
+    sleep(60) #1 minutes to let instrument rest
+    retry
+  ensure
+    if es #when we have errors, es is automatically GC'ed and set to nil.
+      $log.info 'Killing program through ensure...'
+      es.kill
+      es = nil
+    end
+  end
+  $log.info
+  $log.info
+  $log_file.flush #since .sync doesn't work for some reason
+  print '.'
+end

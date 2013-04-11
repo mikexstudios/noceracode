@@ -88,7 +88,7 @@ class EchemSoftware
 
   # Given a macro string, enters it into the Macro Command... window and 
   # runs it.
-  def execute_macro(macro, check_interval = 10, max_runtime = nil,
+  def execute_macro(check_interval = 10, max_runtime = nil,
                     is_information_expected = false)
     $log.debug 'Executing macro...'
 
@@ -97,11 +97,8 @@ class EchemSoftware
     AutoItX3::Window.wait('Macro Command')
 
     AutoItX3.send_keys('!E') #Get into the text box
-    AutoItX3.send_keys("folder: %s\n" % @folder)
-    AutoItX3.send_keys(macro)
-    #macro += "save  = %s" % (@save_filename_format % {pass: pass, run: i+1})
-    #macro += "tsave = %s" % (@save_filename_format % {pass: pass, run: i+1})
-    sleep(1)
+    AutoItX3.send_keys(@macro)
+    sleep(2)
     AutoItX3.send_keys('!M') #Run Macro
     
     #Check the status of the program. We check for both program crashing:
@@ -208,7 +205,7 @@ class EchemSoftware
                :sample_interval => 0.1, 
                :run_time => 400,
                :quiet_time => 0,
-               :scales_during_run => 3,
+               #:scales_during_run => 3,
                :sensitivity => 1.0e-6,
              }.merge(params)
     $log.info params
