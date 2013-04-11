@@ -176,7 +176,7 @@ class EchemSoftware
         end
       
         print '.' #for progress
-  	$log.debug '.'
+  	    $log.debug '.'
       end
     end
   end
@@ -196,7 +196,7 @@ class EchemSoftware
     $log.debug 'Setting manual iR compensation: %g' % resistance
 
     @macro += "mir = %g\n" % resistance
-    @macro += "ircompon" #to turn off, use: ircompoff
+    @macro += "ircompon\n" #to turn off, use: ircompoff
   end
 
   def setup_amperometric_it_curve(params)

@@ -6,7 +6,7 @@ $log_file = File.new(File.join(@save_path, 'rotator.log'), 'w')
 #$log_file.sync = true #do not buffer (doesn't actually work)
 #Change working directory to where the automate files are.
 Dir.chdir($:.last)
-require 'automate_chi.rb'
+require 'automate_chi_macro.rb'
 
 # Experiment variables
 @potential_range = (1.20..0.80) #V, also controls direction of scan
@@ -48,6 +48,6 @@ for pass in 1..@num_passes
     @init_e = p
 
     @save_filename  = @save_filename_format % {pass: pass, run: i+1}
-    run_ait
+    run_ait_macro
   end
 end
