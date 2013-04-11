@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+#Must include logging information before requiring automate_chi
+$log_file = File.new('C:\Users\Electrochemistry\Dropbox\Electrochemistry\Mike\09-10-2012\06tafel\rotator.log', 'w')
+#$log_file.sync = true #do not buffer (doesn't actually work)
+require './automate_chi.rb'
+
+# Experiment variables
+@potential_range = (1.20..0.80) #V, also controls direction of scan
+@step = (@potential_range.last - @potential_range.first) / 12.0 
+#@sample_time = 300 #sec, of each point
+@sample_time = lambda do |p|
+  t = 10 #normal run time in s
+  t = 300 if p == @potential_range.first #anodization of first point
+  return t
+end
+#The sensitivity must be specified as 1e-n where n = [1, 12], because that is
+#what the potentiostat can handle. We use a lambda so that sensitivity is
+#dynamic as a function of potential.
+#@sensitivity = 1e-4 #A/V
+@sensitivity = lambda do |p|
+  s = 1e-5 if p <= @potential_range.first
+  s = 1e-6 if p <= 0.90
+  return s
+end
+@sample_interval = 1 #sec between each point sample
+@num_passes = 1
+@ir_comp = 16 #ohm
+#Save filename in sprintf format. Leave out .bin/.txt.
+#<pass> -> denotes the pass number
+#<run>  -> denotes the run number
+@save_filename_format = 'ait_p%02<pass>i_%02<run>i' #e.g. ait_p01_02
+
+
+# Internal variables and routines (do not change)
+@save_folder = Dir.pwd #set to current working directory
+
+#We run from high potential to low potential
+for pass in 1..@num_passes
+  #Since we can't have negative step values (ie. for when we decrement), 
+  #we need to generate our potentials by manually specifying the start and
+  #end values of our range.
+  potentials = (@potential_range.first).step(@potential_range.last, @step)
+  potentials = potentials.to_a.map {|x| x.round(3)}
+  $log.info('Potentials: %s' % potentials.to_s)
+
+  potentials.each_with_index do |p, i|
+    @init_e = p
+
+    @run_time = @sample_time.call(p)
+    @status_check_interval = (@run_time + 5) / 2 #sec
+    @save_filename  = @save_filename_format % {pass: pass, run: i+1}
+
+    run_ait
+  end
+end
