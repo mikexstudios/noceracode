@@ -4,6 +4,7 @@ def run_ait
   begin
     $log.info 'tafel_ait: %s' % @save_filename
     es = EchemSoftware.new
+    es.set_save_path(@save_path)
     es.setup_amperometric_it_curve(@init_e, @sample_interval, @sample_time.call(@init_e), 
                                    0, 3, @sensitivity.call(@init_e)) 
 
@@ -17,7 +18,6 @@ def run_ait
     @status_max_runtime = @sample_time.call(@init_e) + 10 #sec
     es.run(@status_check_interval, @status_max_runtime)
 
-    @save_filename  = @save_filename_format % {pass: pass, run: i+1}
     es.save_as(@save_filename)
   rescue RuntimeError
     $log.error 'RuntimeError: Retrying experiment...'

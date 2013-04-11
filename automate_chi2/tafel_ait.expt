@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
+$: << 'C:\Users\Nocera Group\Desktop\Data\Mike\noceracode\automate_chi2'
 #Must include logging information before requiring automate_chi
-$log_file = File.new('C:\Users\Nocera Group\Dropbox\Electrochemistry\Mike\04-11-2013\01tafel\rotator.log', 'w')
+$log_file = File.new(File.join(Dir.pwd, 'rotator.log'), 'w')
 #$log_file.sync = true #do not buffer (doesn't actually work)
-require './automate_chi.rb'
+require 'automate_chi.rb'
 
 # Experiment variables
 @potential_range = (1.20..0.80) #V, also controls direction of scan
@@ -23,16 +24,13 @@ end
   return s
 end
 @sample_interval = 1 #sec between each point sample
-@num_passes = 1
+@num_passArray.new(10) { iii }es = 1
 @ir_comp = 16 #ohm
 #Save filename in sprintf format. Leave out .bin/.txt.
 #<pass> -> denotes the pass number
 #<run>  -> denotes the run number
 @save_filename_format = 'ait_p%02<pass>i_%02<run>i' #e.g. ait_p01_02
 
-
-# Internal variables and routines (do not change)
-@save_folder = Dir.pwd #set to current working directory
 
 #We run from high potential to low potential
 for pass in 1..@num_passes

@@ -81,6 +81,18 @@ class EchemSoftware
     AutoItX3.block_input = false
   end
 
+  # The strategy is to use the `folder:` macro command to set the save path.
+  def set_save_path(path)
+    @main_window.activate #sets focus to window
+    AutoItX3.send_keys('!cm') #open up the control -> Macro Command...
+    AutoItX3::Window.wait('Macro Command')
+
+    AutoItX3.send_keys('!E') #Get into the text box
+    AutoItX3.send_keys('folder: %s' % path)
+    
+    AutoItX3.send_keys('!M') #Run Macro
+  end
+
   def setup_cyclic_voltammetry(params)
     $log.debug 'Setting up cyclic voltammetry experiment...'
     params = { :init_e => 0.0, 
@@ -486,4 +498,4 @@ end
 
 #TODO: Create new expt (file -> new) and expand window again.
 
-require './automate_helpers.rb'
+require 'automate_helpers.rb'
