@@ -186,10 +186,12 @@ class EchemSoftware
     @macro += "folder: %s\n" % path
   end
 
-  def setup_save_filename(filename)
+  def setup_save_filename(filename, save_text = true)
     $log.debug 'Setting save filename: %s' % filename
     @macro += "save = %s\n" % filename
-    @macro += "tsave = %s\n" % filename
+    if save_text:
+      @macro += "tsave = %s\n" % filename
+    end
   end
 
   def setup_charge_abort(charge)
@@ -265,13 +267,13 @@ class EchemSoftware
     AutoItX3.send_keys('!i') #Check iR Compensation for Next Run box
 
     AutoItX3.send_keys('!E') #Test E (V)
-    AutoItX3.send_keys(test_e.to_s)
+    AutoItX3.send_keys(params[:test_e].to_s)
     AutoItX3.send_keys('!S') #Step Amplitude (V)
-    AutoItX3.send_keys(step_amplitude.to_s)
+    AutoItX3.send_keys(params[:step_amplitude].to_s)
     AutoItX3.send_keys('!L') #Comp Level (%)
-    AutoItX3.send_keys(comp_level.to_s)
+    AutoItX3.send_keys(params[:comp_level].to_s)
     AutoItX3.send_keys('!v') #Overshoot (%)
-    AutoItX3.send_keys(overshoot.to_s)
+    AutoItX3.send_keys(params[:overshoot].to_s)
 
     AutoItX3.send_keys('!T') #Test button
 
@@ -279,7 +281,6 @@ class EchemSoftware
     begin
       #Now we have to wait until values appear in the iR Comp Test Results area.
       sleep(18) #sec
-      #TODO: Have a retry loop checking for the iR comp values to appear
   
       #Now extract the values
       resistance_control = AutoItX3::Control.new('iR Compensation', '', 'Edit1')
@@ -291,7 +292,7 @@ class EchemSoftware
         $log.error 'iR Comp Test Results are empty!'
         raise RuntimeError, 'iR Comp Test Results are empty!'
       end
-    rescue RuntimeError
+    rescue RuntimeError, AutoItX3::Au3Error #It could be that Edit1 can't be read yet
       tries += 1
       $log.info 'Retrying reading iR Comp Test Results...'
       retry if tries < 2

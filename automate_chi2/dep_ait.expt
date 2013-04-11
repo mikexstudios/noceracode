@@ -2,14 +2,14 @@
 $: << 'C:\Users\Nocera Group\Desktop\Data\Mike\noceracode\automate_chi2'
 #Must include logging information before requiring automate_chi
 @save_path = Dir.pwd
-$log_file = File.new(File.join(@save_path, 'automate.log'), 'w')
+$log_file = File.new(File.join(@save_path, '%s.log' % File.basename($0, '.*')), 'w')
 #$log_file.sync = true #do not buffer (doesn't actually work)
 #Change working directory to where the automate files are.
 Dir.chdir($:.last)
 require 'automate_chi_macro.rb'
 
 # Experiment variables
-@init_e = 0.34 #V
+@init_e = 1.54 #V
 @total_charge = 6e-3 #C
 #The sensitivity must be specified as 1e-n where n = [1, 12], because that is
 #what the potentiostat can handle. We use a lambda so that sensitivity is
@@ -17,7 +17,7 @@ require 'automate_chi_macro.rb'
 @sensitivity = 1e-4 #A/V
 @sample_interval = 1 #sec between each point sample
 @ir_comp = :auto #ohm
-@save_filename  = 'dep_ait'
+@save_filename  = File.basename($0, '.*') #remove exp from current file
 
 @status_check_interval = 10 #sec, check if deposition has completed every
 @status_max_runtime = 30 * 60 #sec, assume program has crashed after this

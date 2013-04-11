@@ -2,7 +2,7 @@
 $: << 'C:\Users\Nocera Group\Desktop\Data\Mike\noceracode\automate_chi2'
 #Must include logging information before requiring automate_chi
 @save_path = Dir.pwd
-$log_file = File.new(File.join(@save_path, 'automate.log'), 'w')
+$log_file = File.new(File.join(@save_path, '%s.log' % File.basename($0, '.*')), 'w')
 #$log_file.sync = true #do not buffer (doesn't actually work)
 #Change working directory to where the automate files are.
 Dir.chdir($:.last)

@@ -95,9 +95,9 @@ def run_dep_ait_macro
     es.setup_charge_abort(@total_charge)
     es.setup_amperometric_it_curve(:init_e => @init_e, 
       :sample_interval => @sample_interval, 
-      :run_time => @sample_time.call(@init_e), 
+      :run_time => @status_max_runtime - 10, 
       :quiet_time => 0,
-      :sensitivity => @sensitivity.call(@init_e)) 
+      :sensitivity => @sensitivity) 
     es.setup_save_filename(@save_filename)
 	
     #When our runtime exceeds the maximum runtime given below, we assume the experi
