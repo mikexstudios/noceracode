@@ -1,8 +1,11 @@
 #!/usr/bin/env ruby
 $: << 'C:\Users\Nocera Group\Desktop\Data\Mike\noceracode\automate_chi2'
 #Must include logging information before requiring automate_chi
-$log_file = File.new(File.join(Dir.pwd, 'rotator.log'), 'w')
+@save_path = Dir.pwd
+$log_file = File.new(File.join(@save_path, 'rotator.log'), 'w')
 #$log_file.sync = true #do not buffer (doesn't actually work)
+#Change working directory to where the automate files are.
+Dir.chdir($:.last)
 require 'automate_chi.rb'
 
 # Experiment variables
@@ -11,7 +14,7 @@ require 'automate_chi.rb'
 #@sample_time = 300 #sec, of each point
 @sample_time = lambda do |p|
   t = 10 #normal run time in s
-  t = 300 if p == @potential_range.first #anodization of first point
+  #t = 300 if p == @potential_range.first #anodization of first point
   return t
 end
 #The sensitivity must be specified as 1e-n where n = [1, 12], because that is
@@ -24,7 +27,7 @@ end
   return s
 end
 @sample_interval = 1 #sec between each point sample
-@num_passArray.new(10) { iii }es = 1
+@num_passes = 1
 @ir_comp = 16 #ohm
 #Save filename in sprintf format. Leave out .bin/.txt.
 #<pass> -> denotes the pass number
@@ -43,6 +46,8 @@ for pass in 1..@num_passes
 
   potentials.each_with_index do |p, i|
     @init_e = p
+
+    @save_filename  = @save_filename_format % {pass: pass, run: i+1}
     run_ait
   end
 end
