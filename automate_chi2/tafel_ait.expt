@@ -45,9 +45,6 @@ for pass in 1..@num_passes
 
   potentials.each_with_index do |p, i|
     @init_e = p
-
-    @run_time = @sample_time.call(p)
-    @status_check_interval = (@run_time + 5) / 2 #sec
     @save_filename  = @save_filename_format % {pass: pass, run: i+1}
 
     run_ait

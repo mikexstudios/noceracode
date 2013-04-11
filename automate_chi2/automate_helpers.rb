@@ -4,8 +4,8 @@ def run_ait
   begin
     $log.info 'tafel_ait: %s' % @save_filename
     es = EchemSoftware.new
-    es.setup_amperometric_it_curve(@init_e, @sample_interval, @run_time, 
-                                   0, 3, @sensitivity) 
+    es.setup_amperometric_it_curve(@init_e, @sample_interval, @sample_time.call(@init_e), 
+                                   0, 3, @sensitivity.call(@init_e)) 
 
     #Another quirk with the software is that iR comp must be called after RDE
     #it seems or else iR comp won't actually be enabled.
@@ -13,7 +13,8 @@ def run_ait
 	
     #When our runtime exceeds the maximum runtime given below, we assume the experi
     #has crashed and exit from loop.
-    @status_max_runtime = @run_time + 10 #sec
+    @status_check_interval = (@sample_time.call(@init_e) + 5) / 2 #sec
+    @status_max_runtime = @sample_time.call(@init_e) + 10 #sec
     es.run(@status_check_interval, @status_max_runtime)
     es.save_as(@save_filename)
   rescue RuntimeError
