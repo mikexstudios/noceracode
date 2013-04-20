@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+$: << 'C:\Users\Nocera Group\Desktop\Data\Mike\noceracode\automate_chi2'
+#Must include logging information before requiring automate_chi
+@save_path = Dir.pwd
+$log_file = File.new(File.join(@save_path, '%s.log' % File.basename($0, '.*')), 'w')
+#$log_file.sync = true #do not buffer (doesn't actually work)
+#Change working directory to where the automate files are.
+Dir.chdir($:.last)
+require 'automate_chi_macro.rb'
+
+# Experiment variables
+@init_e = :ocp
+@high_e = 1.30 #V
+#Since we can't have negative step values (ie. for when we decrement), 
+#we need to generate our potentials by manually specifying the start and
+#end values of our range.
+#@low_es = -1.20.step(-2.10, -0.10) #range of low_e that we want to scan against
+@low_es = -1.40.step(-2.10, -0.10) #range of low_e that we want to scan against
+#@final_e = :ocp
+@scan_rate = 0.05 #V/s
+#The sensitivity must be specified as 1e-n where n = [1, 12], because that is
+#what the potentiostat can handle. We use a lambda so that sensitivity is
+#dynamic as a function of potential.
+#@sensitivity = 1e-4 #A/V
+@sensitivity_p = lambda do |p|
+  s = 1e-1 if p <= @low_es.first - 0.3
+  s = 1e-2 if p <= @low_es.first - 0.1
+  s = 1e-3 if p <= @low_es.first
+  return s
+end
+#@num_passes = 2
+@ir_comp = 14.7 #ohm
+#Save filename in sprintf format. Leave out .bin/.txt.
+#<pass> -> denotes the pass number
+#<run>  -> denotes the run number
+#@save_filename_format = 'cv_p%02<pass>i_%02<run>i' #e.g. ait_p01_02
+@save_filename_format = 'cv_%02<run>i' #e.g. ait_p01_02
+
+# Fixed experimental variables
+@initial_scan_polarity = :positive
+@sweep_segments = 3
+@sample_interval = 0.001 #sec between each point sample
+
+
+#We run from high potential to low potential
+#for pass in 1..@num_passes
+  low_es = @low_es.to_a.map {|x| x.round(3)}
+  $log.info('Low E Potentials: %s' % low_es.to_s)
+
+  low_es.each_with_index do |low_e, i|
+    @low_e = low_e
+    @sensitivity = @sensitivity_p.call(low_e)
+
+    @save_filename  = @save_filename_format % {run: i+1}
+    run_cv_macro
+  end
+#end

@@ -188,8 +188,9 @@ class EchemSoftware
 
   def setup_save_filename(filename, save_text = true)
     $log.debug 'Setting save filename: %s' % filename
+    @macro += "fileoverride\n"
     @macro += "save = %s\n" % filename
-    if save_text:
+    if save_text
       @macro += "tsave = %s\n" % filename
     end
   end
@@ -221,6 +222,41 @@ class EchemSoftware
     @macro += "ei = %g\n" % params[:init_e]
     @macro += "si = %g\n" % params[:sample_interval]
     @macro += "st = %g\n" % params[:run_time]
+    @macro += "qt = %g\n" % params[:quiet_time]
+    @macro += "sens = %g\n" % params[:sensitivity]
+    @macro += "run\n"
+  end
+
+  def setup_cyclic_voltammetry(params)
+    $log.debug 'Setting up cyclic voltammetry experiment...'
+    params = { :init_e => 0, 
+               :high_e => 0,
+               :low_e => 0,
+               :final_e => 0,
+               :initial_scan_polarity => :negative,
+               :scan_rate => 0.1,
+               :sweep_segments => 2,
+               :sample_interval => 0.001,
+               :quiet_time => 2,
+               :sensitivity => 1.0e-3,
+             }.merge(params)
+    $log.info params
+
+    @macro += "tech = cv\n"
+    if params[:init_e] == :ocp
+      @macro += "eio\n" 
+    else
+      @macro += "ei = %g\n" % params[:init_e]
+    end
+    @macro += "eh = %g\n" % params[:high_e]
+    @macro += "el = %g\n" % params[:low_e]
+    #@macro += "ef = %g\n" % params[:init_e]
+    pn = 'p' if params[:initial_scan_polarity] == :positive
+    pn = 'n' if params[:initial_scan_polarity] == :negative
+    @macro += "pn = %s\n" % pn
+    @macro += "v = %g\n" % params[:scan_rate]
+    @macro += "cl = %i\n" % params[:sweep_segments]
+    @macro += "si = %g\n" % params[:sample_interval]
     @macro += "qt = %g\n" % params[:quiet_time]
     @macro += "sens = %g\n" % params[:sensitivity]
     @macro += "run\n"
