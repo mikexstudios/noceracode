@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+require './usbnetpower8800.rb'
+
+flag = ARGV.first
+u = USBNetPower8800.new
+if flag == 'on'
+  u.on
+elif flag == 'off'
+  u.off
+else
+  u.toggle
+end
+u.close
