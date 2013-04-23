@@ -50,7 +50,7 @@ def run_ait_macro
       :sample_interval => @sample_interval, 
       :run_time => @run_time, 
       :quiet_time => 0,
-      :sensitivity => @sensitivity.call(@init_e)) 
+      :sensitivity => @sensitivity) 
     es.setup_save_filename(@save_filename)
 	
     #When our runtime exceeds the maximum runtime given below, we assume the experi
