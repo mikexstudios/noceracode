@@ -270,9 +270,7 @@ class EchemSoftware
                :sample_interval => 1, #s
                #:preelectrolysis_e => 0,
                #:preelectrolysis_time => 0,
-               :sensitivity => 1.0e-6,
-               #If auto sens is enabled, above sensitivity is ignored.
-               :use_auto_sensitivity => true,
+               :sensitivity => :auto, #use floats or :auto
              }.merge(params)
     $log.info params
 
@@ -281,7 +279,7 @@ class EchemSoftware
     @macro += "iratio = %g\n" % params[:end_current_ratio]
     @macro += "st = %g\n" % params[:run_time]
     @macro += "si = %g\n" % params[:sample_interval]
-    if params[:use_auto_sensitivity]
+    if params[:sensitivity] == :auto
       @macro += "autosens\n"
     else
       @macro += "sens = %g\n" % params[:sensitivity]

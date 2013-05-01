@@ -190,7 +190,7 @@ def run_be_macro
     es.setup_bulk_electrolysis(:electrolysis_e => @electrolysis_e, 
       :run_time => @run_time, 
       :sample_interval => @sample_interval, 
-      :use_auto_sensitivity => true) 
+      :sensitivity => :auto) 
     es.setup_save_filename(@save_filename)
 	
     #When our runtime exceeds the maximum runtime given below, we assume the experi
