@@ -262,6 +262,33 @@ class EchemSoftware
     @macro += "run\n"
   end
 
+  def setup_bulk_electrolysis(params)
+    $log.debug 'Setting up bulk electrolysis with coulometry experiment...'
+    params = { :electrolysis_e => 0, #V
+               :end_current_ratio => 0, 
+               :run_time => 40000,
+               :sample_interval => 1, #s
+               #:preelectrolysis_e => 0,
+               #:preelectrolysis_time => 0,
+               :sensitivity => 1.0e-6,
+               #If auto sens is enabled, above sensitivity is ignored.
+               :use_auto_sensitivity => true,
+             }.merge(params)
+    $log.info params
+
+    @macro += "tech = be\n"
+    @macro += "ei = %g\n" % params[:electrolysis_e]
+    @macro += "iratio = %g\n" % params[:end_current_ratio]
+    @macro += "st = %g\n" % params[:run_time]
+    @macro += "si = %g\n" % params[:sample_interval]
+    if params[:use_auto_sensitivity]
+      @macro += "autosens\n"
+    else
+      @macro += "sens = %g\n" % params[:sensitivity]
+    end
+    @macro += "run\n"
+  end
+
   def close
     $log.debug 'Closing program...'
 
