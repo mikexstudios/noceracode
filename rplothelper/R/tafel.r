@@ -29,7 +29,9 @@ plot.tafel <- function(..., cex = 4.5, type = 'p', is_y_labels = TRUE,
              ann = FALSE, #we will make our own axes annotation
              type = type, #points
              tck = 0, #we will make our own tick marks
-             cex = cex #point size
+             cex = cex, #point size
+             xaxs = 'i',
+             yaxs = 'i'
             )
         
         #Setup post-plotting customizations
@@ -37,39 +39,28 @@ plot.tafel <- function(..., cex = 4.5, type = 'p', is_y_labels = TRUE,
 
         if (is_y_labels) {
             #Left axis, inner tick mark with tck, thicker line with lwd.
-            #axis(2, at = axTicks(2), label = FALSE, lwd = 4, tck = 0.05)
-            axis(2, at = axTicks(2), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
-                 las = 1) #make y-axis labels horizontal
+            axis(side = 2, at = axTicks(2), label = TRUE, lwd = 3, tck = 0.05,
+                 cex.axis = 2.8, las = 1) #make y-axis labels horizontal
             mtext(side = 2, text = plot.tafel.ylab,
                   line = y_label_line, cex = 3.0, las = 0) #make y-axis labels parallel again
         } else if (is_y_ticks) {
-            axis(2, at = axTicks(2), label = FALSE, lwd = 4, tck = 0.05, cex.axis = 2.9,
-                 las = 1) #make y-axis labels horizontal
+            axis(side = 2, at = axTicks(2), label = FALSE, lwd = 3, tck = 0.05,
+                 cex.axis = 2.8, las = 1) #make y-axis labels horizontal
         }
         
         #Bottom axis
         if (is_x_labels) {
-            axis(1, at = axTicks(1), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
-                 mgp = c(5.6, 1.9, 0))
-            mtext(side = 1, text = plot.tafel.xlab,
-                  line = 5.5, cex = 3.0)
+            axis(side = 1, at = axTicks(1), label = TRUE, lwd = 3, tck = 0.05,
+                 cex.axis = 2.8, mgp = c(5.6, 1.9, 0))
+            mtext(side = 1, text = plot.tafel.xlab, line = 5.5, cex = 3.0)
         } else if (is_x_ticks) {
-            axis(1, at = axTicks(1), label = TRUE, lwd = 4, tck = 0.05, cex.axis = 2.9,
-                 mgp = c(5.6, 1.9, 0))
+            axis(side = 1, at = axTicks(1), label = TRUE, lwd = 3, tck = 0.05,
+                 cex.axis = 2.8, mgp = c(5.6, 1.9, 0))
         }
             
         if (is_minor_ticks) {
-            minor.tick(nx=2, ny=2, tick.ratio=-2, lwd = 3)
+            minor.tick(nx=2, ny=2, tick.ratio=-2, lwd = 2.5)
         }
-
-        #Add another axis at the bottom for NHE
-        #axis(1, at = axTicks(1), 
-        #     label = round(axTicks(1) - potential_reference_correction, digits = 3), 
-        #     lwd = 2,
-        #     tck = 0.03,
-        #     line = 3.3)
-        #mtext(1, text = expression(italic('E') * " (V vs. Ag/AgCl)"),
-        #      line = 4.8)
 
         plot.tafel.is_first_plot <<- FALSE #need double arrow to overwrite global
     } else {
@@ -87,18 +78,21 @@ plot.tafel.legend <- function(..., lwd = 6, cex = 2.5, seg.len = 3) {
            bty = 'n')
 }
 
-plot.tafel.add_overpotentials <- function(E_water_ox_standard) {
+plot.tafel.add_overpotentials <- function(E_water_ox_standard, is_minor_ticks = TRUE) {
     #NOTE: User must override plot.tafel.setup with extra margin on
     #      the right side of the plot!
     axis(4, at = axTicks(2), 
          tck = 0.05,
-         lwd = 4,
-         cex.axis = 2.9,
+         lwd = 3,
+         cex.axis = 2.8,
          mgp = c(5.6, 1.1, 0),
          label = round((axTicks(2) - E_water_ox_standard) * 1000), 
          las = 1) #make y-axis labels horizontal
-    #Use modded minor.tick to add ticks to right axis.
-    minor.tick(nx=2, ny=2, tick.ratio=-2, side = 4, lwd = 3)
+
+    if (is_minor_ticks) {
+        #Use modded minor.tick to add ticks to right axis.
+        minor.tick(nx=2, ny=2, tick.ratio=-2, side = 4, lwd = 2.5)
+    }
 
     mtext(expression(eta ~ "/ mV"), side = 4, line = 7.8, cex = 3.0,
           las = 0) #make label vertical again

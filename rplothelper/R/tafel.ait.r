@@ -3,20 +3,20 @@ tafel.ait.sample_rate = 1
 
 #Note, skip to the line right before where the parameters are specified
 #(ie. Init E (V), etc.)
-tafel.ait.get_potential <- function(filename, skip = 9) {
+tafel.ait.get_potential <- function(filename, skip = 8) {
     filename = paste(tafel.ait.data_dir, filename, sep='') 
     params = read.table(file = filename, 
                         sep = '=', 
-                        skip = 9, 
+                        skip = skip, 
                         header = FALSE, 
-                        nrow = 6, 
+                        nrow = 1, 
                         strip.white = TRUE, 
                         col.names = c('key', 'value'))
 
     return(params[params$key == 'Init E (V)', 'value'])
 }
 
-tafel.ait.get_current <- function(filename, skip = 16, average_last = 10, #in s
+tafel.ait.get_current <- function(filename, skip = 15, average_last = 10, #in s
                                 make_positive = TRUE) {
     ##Extract the rotation speed from the base filename
     #angular_velocity = strsplit(filename, '.txt')[[1]]
