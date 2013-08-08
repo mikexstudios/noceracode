@@ -25,7 +25,7 @@ def run_ait
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-    sleep(60) #1 minutes to let instrument rest
+    sleep(20) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
@@ -64,7 +64,7 @@ def run_ait_macro
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-    sleep(60) #1 minutes to let instrument rest
+    sleep(20) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
@@ -109,7 +109,7 @@ def run_dep_ait_macro
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-    sleep(60) #1 minutes to let instrument rest
+    sleep(20) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
@@ -166,7 +166,7 @@ def run_cv_macro
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-    sleep(60) #1 minutes to let instrument rest
+    sleep(20) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
@@ -204,7 +204,7 @@ def run_be_macro
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-    sleep(60) #1 minutes to let instrument rest
+    sleep(20) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
