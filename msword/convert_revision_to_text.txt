@@ -1,0 +1,36 @@
+Sub ConvertRevisionToText()
+' How to use:
+' 1. Enable Developer ribbon
+' 2. Open Visual Basic Editor under Developer ribbon
+' 3. Insert a new Module
+' 4. Paste this code into the module.
+' 5. Select portion of text that you want to convert.
+' 6. Run the macro.
+ActiveDocument.Activate ' focus on active window
+ActiveDocument.TrackRevisions = False ' do not track any new changes
+
+Dim r As Revision
+For Each r In Selection.Range.Revisions
+  r.Range.Select
+  DoEvents ' update the screen so we can see how far we are through
+  
+  q = MsgBox("Convert this revision?", vbQuestion + vbYesNo, "Convert")
+  If q = vbYes Then
+    If r.Type = wdRevisionDelete Then
+        r.Reject
+        With Selection.Range
+            .Font.ColorIndex = wdRed
+            .Font.StrikeThrough = True
+        End With
+    Else
+      If r.Type = wdRevisionInsert Then
+          r.Accept
+          With Selection.Range
+              ' .Font.ColorIndex = wdBlue
+              .Font.ColorIndex = wdRed
+          End With
+      End If
+    End If
+  End If
+Next
+End Sub
