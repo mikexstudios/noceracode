@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+$: << 'C:\Users\Nocera Group\Desktop\Data\Mike\noceracode\automate_chi2'
+#Must include logging information before requiring automate_chi
+@save_path = Dir.pwd
+$log_file = File.new(File.join(@save_path, '%s.log' % File.basename($0, '.*')), 'w')
+#$log_file.sync = true #do not buffer (doesn't actually work)
+#Change working directory to where the automate files are.
+Dir.chdir($:.last)
+require 'automate_chi_macro.rb'
+
+# Experiment variables
+@potential_range = (1.08..0.95) #V, also controls direction of scan
+@even_pass_reverse_direction = true #on even passes, reverse scan direction
+@step = (@potential_range.last - @potential_range.first) / 12.0 
+#@sample_time = 300 #sec, of each point
+@sample_time = lambda do |pass, potential|
+  t = 20 #normal run time in s
+  t = 60 if pass == 1 and potential == @potential_range.first
+  return t
+end
+@num_passes = 2
+@sample_interval = 1 #s
+@ir_comp = 14.7 #ohm
+#Save filename in sprintf format. Leave out .bin/.txt.
+#<pass> -> denotes the pass number
+#<run>  -> denotes the run number
+@save_filename_format = 'be_p%02<pass>i_%02<run>i' #e.g. ait_p01_02
+
+
+#We run from high potential to low potential
+for pass in 1..@num_passes
+  #Since we can't have negative step values (ie. for when we decrement), 
+  #we need to generate our potentials by manually specifying the start and
+  #end values of our range.
+  potentials = (@potential_range.first).step(@potential_range.last, @step)
+  potentials = potentials.to_a.map {|x| x.round(3)}
+  potentials.reverse! if @even_pass_reverse_direction and pass.even?
+  $log.info('Potentials: %s' % potentials.to_s)
+
+  potentials.each_with_index do |p, i|
+    @electrolysis_e = p
+
+    @run_time = @sample_time.call(pass, p)
+    @save_filename  = @save_filename_format % {pass: pass, run: i+1}
+    run_be_macro
+  end
+end

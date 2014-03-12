@@ -25,7 +25,7 @@ def run_ait
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-    sleep(60) #1 minutes to let instrument rest
+    sleep(20) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
@@ -50,7 +50,7 @@ def run_ait_macro
       :sample_interval => @sample_interval, 
       :run_time => @run_time, 
       :quiet_time => 0,
-      :sensitivity => @sensitivity.call(@init_e)) 
+      :sensitivity => @sensitivity) 
     es.setup_save_filename(@save_filename)
 	
     #When our runtime exceeds the maximum runtime given below, we assume the experi
@@ -64,7 +64,7 @@ def run_ait_macro
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-    sleep(60) #1 minutes to let instrument rest
+    sleep(20) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
@@ -109,7 +109,7 @@ def run_dep_ait_macro
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-    sleep(60) #1 minutes to let instrument rest
+    sleep(20) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
@@ -166,7 +166,7 @@ def run_cv_macro
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-    sleep(60) #1 minutes to let instrument rest
+    sleep(20) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
@@ -190,7 +190,7 @@ def run_be_macro
     es.setup_bulk_electrolysis(:electrolysis_e => @electrolysis_e, 
       :run_time => @run_time, 
       :sample_interval => @sample_interval, 
-      :use_auto_sensitivity => true) 
+      :sensitivity => :auto) 
     es.setup_save_filename(@save_filename)
 	
     #When our runtime exceeds the maximum runtime given below, we assume the experi
@@ -204,7 +204,7 @@ def run_be_macro
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-    sleep(60) #1 minutes to let instrument rest
+    sleep(20) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.

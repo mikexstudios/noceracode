@@ -94,7 +94,10 @@ class EchemSoftware
 
     @main_window.activate #sets focus to window
     AutoItX3.send_keys('!cm') #open up the control -> Macro Command...
-    AutoItX3::Window.wait('Macro Command')
+    if not AutoItX3::Window.wait('Macro Command', '', 10) #s
+      $log.error 'Macro Command window now found. Software may have glitched.'
+      raise RuntimeError, 'Macro Command window now found. Software may have glitched.'
+    end
 
     AutoItX3.send_keys('!E') #Get into the text box
     AutoItX3.send_keys(@macro)
@@ -117,7 +120,7 @@ class EchemSoftware
     while true
       sleep(5)
 	  
-	  #Check if we have an Error window.
+	    #Check if we have an Error window.
       if AutoItX3::Window.exists?('Error')
         $log.error 'Detected Error window (probably Link Failed).'
         raise RuntimeError, 'Software has an error! Please restart experiment.'
@@ -270,9 +273,7 @@ class EchemSoftware
                :sample_interval => 1, #s
                #:preelectrolysis_e => 0,
                #:preelectrolysis_time => 0,
-               :sensitivity => 1.0e-6,
-               #If auto sens is enabled, above sensitivity is ignored.
-               :use_auto_sensitivity => true,
+               :sensitivity => :auto, #use floats or :auto
              }.merge(params)
     $log.info params
 
@@ -281,7 +282,7 @@ class EchemSoftware
     @macro += "iratio = %g\n" % params[:end_current_ratio]
     @macro += "st = %g\n" % params[:run_time]
     @macro += "si = %g\n" % params[:sample_interval]
-    if params[:use_auto_sensitivity]
+    if params[:sensitivity] == :auto
       @macro += "autosens\n"
     else
       @macro += "sens = %g\n" % params[:sensitivity]

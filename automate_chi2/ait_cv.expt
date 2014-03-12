@@ -1,0 +1,96 @@
+#!/usr/bin/env ruby
+require 'io/console'
+$: << 'C:\Users\Nocera Group\Desktop\Data\Mike\noceracode\automate_chi2'
+#Must include logging information before requiring automate_chi
+@save_path = Dir.pwd
+$log_file = File.new(File.join(@save_path, '%s.log' % File.basename($0, '.*')), 'w')
+#$log_file.sync = true #do not buffer (doesn't actually work)
+#Change working directory to where the automate files are.
+Dir.chdir($:.last)
+require 'automate_chi_macro.rb'
+
+# Common exp variables
+@ir_comp = 14.7 #ohm
+@num_passes = 1
+
+# Experiment variables for AIT
+@ait_potential_range = (-1.00..-2.10) #V, also controls direction of scan
+@ait_step = -0.10
+@ait_sample_time = 300 #sec, of each point
+#The sensitivity must be specified as 1e-n where n = [1, 12], because that is
+#what the potentiostat can handle. We use a lambda so that sensitivity is
+#dynamic as a function of potential.
+#@sensitivity = 1e-4 #A/V
+@ait_sensitivity_p = lambda do |p|
+  s = 1e-3 if p <= @ait_potential_range.first
+  s = 1e-2 if p <= -1.2
+  s = 1e-1 if p <= -1.5
+  return s
+end
+@ait_sample_interval = 1 #sec between each point sample
+#Save filename in sprintf format. Leave out .bin/.txt.
+#<pass> -> denotes the pass number
+#<run>  -> denotes the run number
+@ait_save_filename_format = 'ait_p%02<pass>i_%02<run>i' #e.g. ait_p01_02
+
+
+# Experiment variables for CV
+@cv_init_e = :ocp
+@cv_high_e = 1.30 #V
+@cv_low_e = -1.20 
+#@final_e = :ocp
+#The sensitivity must be specified as 1e-n where n = [1, 12], because that is
+#what the potentiostat can handle. We use a lambda so that sensitivity is
+#dynamic as a function of potential.
+#@sensitivity = 1e-4 #A/V
+@cv_sensitivity = 1e-3 #A/V
+#@num_passes = 2
+#Save filename in sprintf format. Leave out .bin/.txt.
+#<pass> -> denotes the pass number
+#<run>  -> denotes the run number
+#@save_filename_format = 'cv_p%02<pass>i_%02<run>i' #e.g. ait_p01_02
+@cv_save_filename_format = 'cv_%02<run>i' #e.g. ait_p01_02
+
+# Fixed experimental variables for CV
+@scan_rate = 0.05 #V/s
+@initial_scan_polarity = :positive
+@sweep_segments = 3
+@cv_sample_interval = 0.001 #sec between each point sample
+
+
+#We run from high potential to low potential
+for pass in 1..@num_passes
+  #Since we can't have negative step values (ie. for when we decrement), 
+  #we need to generate our potentials by manually specifying the start and
+  #end values of our range.
+  potentials = (@ait_potential_range.first).step(@ait_potential_range.last, @ait_step)
+  potentials = potentials.to_a.map {|x| x.round(3)}
+  $log.info('Potentials: %s' % potentials.to_s)
+
+  potentials.each_with_index do |p, i|
+    #Take AIT first
+    @init_e = p
+    @sensitivity = @ait_sensitivity_p.call(p)
+    @run_time = @ait_sample_time
+    @save_filename  = @ait_save_filename_format % {pass: pass, run: i+1}
+    @sample_interval = @ait_sample_interval
+    run_ait_macro
+
+    puts 'Turn off stirplate. Then press any key to continue...'
+    STDIN.getch
+    puts 'Okay, starting CV...'
+
+    #Then take CV afterwards
+    @init_e = @cv_init_e
+    @high_e = @cv_high_e
+    @low_e = @cv_low_e
+    @sample_interval = @cv_sample_interval
+    @sensitivity = @cv_sensitivity
+    @save_filename  = @cv_save_filename_format % {run: i+1}
+    run_cv_macro
+
+    puts 'Turn on stirplate. Then press any key to continue...'
+    STDIN.getch
+    puts 'Okay, starting AIT...'
+  end
+end
