@@ -1,0 +1,2 @@
+NOTE: Need to install devtools v0.7 for .Rpackages to work correctly.
+devtools::install_url("https://github.com/hadley/devtools/archive/devtools-0.7.zip")
