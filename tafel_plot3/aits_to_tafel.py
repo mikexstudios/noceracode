@@ -21,14 +21,24 @@ def get_potential(ait_path):
                 break
     return potential
 
-def get_current(ait_path, average_last = 5, skiprows = 17, header = 0, 
+def get_current(ait_path, average_last = 5, header = 0, 
         names = ('potential', 'current'), **kwargs):
+    skiprows = get_skip_rows(ait_path)
     ait_data = pandas.read_csv(ait_path, skiprows = skiprows, 
             header = header, names = names, **kwargs)
     #ait_data = ait_data[1:] #get rid of first empty row
     # Average the last few seconds of curent
     last = ait_data.tail(n = average_last).mean()
     return last['current'].mean()
+
+def get_skip_rows(ait_path):
+    inite_re = re.compile(r'^Time/sec,')
+    with open(ait_path, 'r') as f:
+        for i, line in enumerate(f):
+            m = inite_re.search(line)
+            if m:
+                break
+    return i
 
 def tafel_workup(tafel_df):
     #Normalize the current to surface area
