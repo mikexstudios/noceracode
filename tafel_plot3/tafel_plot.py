@@ -103,6 +103,7 @@ for expt in expts:
     ax.plot(tafel_data['current.norm.log'], tafel_data['potential.nhe'], 
             linestyle='None') 
     xlims = ax.get_xlim()
+    ylims = ax.get_ylim()
 
     # Linear fit
     temp_df = tafel_data
@@ -127,6 +128,7 @@ for expt in expts:
             label = expt['legend_title'])
 
     ax.set_xlim(xlims[0], xlims[1]) #plotting the line expands plot, so move it back
+    ax.set_ylim(ylims[0], ylims[1]) 
 
 
 ax.legend(loc = 'upper left')
