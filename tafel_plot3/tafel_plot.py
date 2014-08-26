@@ -12,10 +12,12 @@ expts = [
     { 
         'legend_title': 'Pass 1',
         'filename': 'p01.csv',
+        'fit_range': (1, 8),
     },
     { 
         'legend_title': 'Pass 2',
         'filename': 'p02.csv',
+        'fit_range': (1, 8),
     },
 ]
 output_filename = 'tafel.pdf' 
@@ -103,7 +105,10 @@ for expt in expts:
     xlims = ax.get_xlim()
 
     # Linear fit
-    model = sm.ols('Q("potential.nhe") ~ Q("current.norm.log")', data = tafel_data)
+    temp_df = tafel_data
+    if expt.get('fit_range', False):
+        temp_df = tafel_data[expt['fit_range'][0]:expt['fit_range'][1]]
+    model = sm.ols('Q("potential.nhe") ~ Q("current.norm.log")', data = temp_df)
     results = model.fit()
     #print results.summary()
     slope = results.params['Q("current.norm.log")'] * 1000.0 #convert to mV/dec
@@ -112,7 +117,7 @@ for expt in expts:
     # We want to create a line that spans the full plot view, so let's add 
     # x-min and x-max to the dataframe and then have the fitting model generate
     # the y-points to plot a line.
-    temp_df = tafel_data.append([{'current.norm.log': xlims[0]}, 
+    temp_df = temp_df.append([{'current.norm.log': xlims[0]}, 
         {'current.norm.log': xlims[1]}], ignore_index=True)
     ax.plot(temp_df['current.norm.log'], results.predict(temp_df), color = color)
 
