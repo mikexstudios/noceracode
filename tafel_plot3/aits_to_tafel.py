@@ -21,7 +21,6 @@ def get_potential(ait_path):
                 break
     return potential
 
-
 def get_current(ait_path, average_last = 5, skiprows = 17, header = 0, 
         names = ('potential', 'current'), **kwargs):
     ait_data = pandas.read_csv(ait_path, skiprows = skiprows, 
@@ -46,6 +45,8 @@ def tafel_workup(tafel_df):
 
     return(tafel_df)
 
+
+# Main:
 
 tafel = pandas.DataFrame()
 ait_files = ['ait_p%02i_%02i.txt' % (1, i) for i in range(1, 13 + 1) ]
