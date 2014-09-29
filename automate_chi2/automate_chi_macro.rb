@@ -120,12 +120,13 @@ class EchemSoftware
     while true
       sleep(5)
 	  
-	    #Check if we have an Error window.
+      #Check if we have an Error window.
       if AutoItX3::Window.exists?('Error')
         $log.error 'Detected Error window (probably Link Failed).'
         raise RuntimeError, 'Software has an error! Please restart experiment.'
       end
 	  
+      check_interval = 6 if check_interval <= 5 #quick hack to prevent negative sleep
       sleep(check_interval-5)
       total_runtime += check_interval
     
