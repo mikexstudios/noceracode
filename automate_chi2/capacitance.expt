@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+#$: << 'C:\Data\mikeh\noceracode\automate_chi2'
+$: << 'C:\Users\Nocera Group\Desktop\Data\Mike\noceracode\automate_chi2'
+#Must include logging information before requiring automate_chi
+@save_path = Dir.pwd
+$log_file = File.new(File.join(@save_path, '%s.log' % File.basename($0, '.*')), 'w')
+#Change working directory to where the automate files are.
+Dir.chdir($:.last)
+require 'automate_chi_macro.rb'
+
+
+# Experiment variables
+@potential_range = (1.05..1.15) #V, also controls direction of scan
+                                #Try to keep range to ~100 mV in a
+                                #non-Faradaic region.
+@scan_rates = [0.05, 0.100, 0.200, 0.300, 0.400, 0.500, 0.600, 0.700] #V/s
+@hold_first_pt_time = 10 #s, first CV potential is held here before CV start 
+#The sensitivity must be specified as 1e-n where n = [1, 12], because that is
+#what the potentiostat can handle. We use a lambda so that sensitivity is
+#dynamic as a function of potential.
+#@sensitivity = 1e-4 #A/V
+@sensitivity_sr = lambda do |sr|
+  s = 1e-6 if sr <= @scan_rates.last
+  s = 1e-7 if sr <= 0.200
+  return s
+end
+@sample_interval = 0.001 #sec between each point sample
+@sweep_segments = 4 #CV segments (2 segments = 1 cycle)
+                    #We will take the 2nd cycle as actual capacitance run.
+                    #since 1st cycle may have extra charging from not starting
+                    #at OCP.
+@ir_comp = 10.0 #ohm
+#Save filename in sprintf format. Leave out .bin/.txt. Keywords:
+#<scanrate>  
+@save_filename_format = 'cv_%<scanrate>i' #e.g. cv_300.bin
+
+
+# Run the experiment
+@scan_rates.each do |scan_rate|
+  @init_e = @potential_range.first
+  @low_e = @potential_range.first
+  @high_e = @potential_range.last
+  @initial_scan_polarity = :positive
+  @scan_rate = scan_rate
+  @sample_interval = @sample_interval
+  @sensitivity = @sensitivity_sr.call(scan_rate)
+  @save_filename  = @save_filename_format % {scanrate: scan_rate}
+  #run_cv_macro
+  run_capacitance_macro
+end

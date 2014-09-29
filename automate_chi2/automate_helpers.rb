@@ -235,11 +235,16 @@ def run_capacitance_macro
     es.setup_manual_ir_compensation(@ir_comp)
 
     #Hold first point for a small amount of time. Don't save.
-    es.setup_bulk_electrolysis(:electrolysis_e => @electrolysis_e, 
-      :run_time => @run_time, 
-      :sample_interval => @sample_interval, 
-      :sensitivity => :auto) 
-
+    es.setup_cyclic_voltammetry(:init_e => @init_e, 
+      :high_e => @init_e + 0.011,
+      :low_e => @low_e,
+      :initial_scan_polarity => @initial_scan_polarity, 
+      :scan_rate => 0.001,
+      :sweep_segments => 1,
+      :sample_interval => @sample_interval,
+      :quiet_time => 0,
+      :sensitivity => @sensitivity) 
+    
     es.setup_cyclic_voltammetry(:init_e => @init_e, 
       :high_e => @high_e,
       :low_e => @low_e,
@@ -253,7 +258,7 @@ def run_capacitance_macro
 
     #Compute an approximate runtime from scan rate and potential range.
     #We assume that the first scan (from :init_e to :high_e) is from :low_e instead.
-    run_time = (@high_e - @low_e).abs / @scan_rate * @sweep_segments
+    run_time = 12 + (@high_e - @low_e).abs / @scan_rate * @sweep_segments
     @status_check_interval = (run_time + 5) / 2 #sec
     @status_max_runtime = run_time + 10 #sec
     $log.debug '@status_check_interval: %i' % @status_check_interval
@@ -268,7 +273,7 @@ def run_capacitance_macro
     #Getting here means that the software has crashed. So let's try to restart
     #it again.
     es.kill
-    sleep(20) #1 minutes to let instrument rest
+    sleep(3) #1 minutes to let instrument rest
     retry
   ensure
     if es #when we have errors, es is automatically GC'ed and set to nil.
