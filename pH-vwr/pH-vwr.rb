@@ -71,7 +71,7 @@ class PHVWR
         line = @sp.readline
         close
 	  }
-	rescue Timeout::Error
+	rescue Timeout::Error, EOFError
 	  tries += 1
 	  retry if tries <= 2
 	end
