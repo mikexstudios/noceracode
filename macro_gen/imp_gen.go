@@ -5,21 +5,56 @@ package main
 
 import "fmt"
 import "flag"
+import "os"
+
+//import "strconv"
 
 func main() {
 	// What do we want to know?
 	// NOTE: These are all pointers to the value, so use * to dereference it.
 	ocp := flag.Float64("ocp", 0.0, "open circuit potential (starting V)")
-	pstep := flag.Float64("pstep", 0.005, "potential value to increment/decrement (in V)")
+	pstep := flag.Float64("pstep", 0.05, "potential value to increment/decrement (in V)")
 	steps := flag.Int("steps", 4, "number of steps above and below the OCP")
 	flag.Parse()
-
-	fmt.Println(*ocp)
-	fmt.Println(*pstep)
-	fmt.Println(*steps)
+	// fmt.Println(*ocp)
+	// fmt.Println(*pstep)
+	// fmt.Println(*steps)
 
 	// Print header
 	printHeader()
+
+	// Set folder
+	cwd, _ := os.Getwd()
+	fmt.Println("folder:", cwd)
+	fmt.Println("fileoverride")
+	fmt.Println()
+
+	// Set base settings
+	printBaseSettings()
+
+	// Generate our potentials
+	potentials := make([]float64, 0)
+	potentials = append(potentials, *ocp)
+	var last float64
+	for i := 0; i < *steps; i++ {
+		last = potentials[len(potentials)-1]
+		potentials = append(potentials, last+*pstep)
+	}
+	// Add back in OCP again to "reset" the electrode
+	potentials = append(potentials, *ocp)
+	for i := 0; i < *steps; i++ {
+		last = potentials[len(potentials)-1]
+		potentials = append(potentials, last-*pstep)
+	}
+	//fmt.Println(potentials)
+
+	// Loop around the OCP and print out each run
+	for i, p := range potentials {
+		printRun(p, fmt.Sprintf("%02d", i))
+		fmt.Println("delay: 10 ;s")
+		fmt.Println()
+	}
+
 }
 
 func printHeader() {
@@ -33,4 +68,26 @@ func printHeader() {
 # NOTE: text after ; on any line is interpreted as comment
 `
 	fmt.Println(header)
+}
+
+func printBaseSettings() {
+	base :=
+		`# Base technique settings
+tech: imp
+fh: 100000 ;Hz
+fl: 0.1 ;Hz
+amp: 0.005 ;V
+qt: 2 ;s, quiet time
+impautosens
+impsf ;single frequency measurements
+# will leave the rest as default
+`
+	fmt.Println(base)
+}
+
+func printRun(potential float64, name string) {
+	fmt.Printf("ei: %.3f ;V\n", potential)
+	fmt.Println("run")
+	fmt.Println("save  =", name)
+	fmt.Println("tsave =", name)
 }
